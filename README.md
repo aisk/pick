@@ -4,7 +4,7 @@ pick
 **pick** is a small python library to help you create curses based interactive selection
 list in the terminal. See it in action:
 
-[![asciicast](https://asciinema.org/a/33923.png)](https://asciinema.org/a/33923)
+![Demo](example/basic.gif?raw=true)
 
 
 ### Installation
