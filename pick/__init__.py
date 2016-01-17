@@ -38,13 +38,11 @@ class Picker(object):
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
-        self.draw()
 
     def move_down(self):
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
-        self.draw()
 
     def get_selected(self):
         """return the current selected option as a tuple: (option, index)
@@ -89,8 +87,10 @@ class Picker(object):
             c = self.screen.getch()
             if c in KEYS_UP:
                 self.move_up()
+                self.draw()
             elif c in KEYS_DOWN:
                 self.move_down()
+                self.draw()
             elif c in KEYS_ENTER:
                 return self.get_selected()
 
