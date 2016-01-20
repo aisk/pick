@@ -1,4 +1,4 @@
-pick
+pick [![Build Status](https://travis-ci.org/wong2/pick.svg?branch=master)](https://travis-ci.org/wong2/pick)
 ====
 
 **pick** is a small python library to help you create curses based interactive selection
@@ -25,5 +25,5 @@ list in the terminal. See it in action:
 
 * `options`: a list of options to choose from
 * `title`: (optional) a title above options list
-* `indicator`: (optional) custom the selection indicator
+* `indicator`: (optional) custom the selection indicator, defaults to *
 * `default_index`: (optional) set this if the default selected option is not the first one
