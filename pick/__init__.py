@@ -55,8 +55,10 @@ class Picker(object):
 
         x, y = 1, 1
         if self.title:
-            self.screen.addstr(y, x, self.title)
-            y += 2
+            for line in self.title.split('\n'):
+                self.screen.addstr(y, x, line)
+                y += 1
+            y += 1 # to have an empty line between title and options
 
         for index, option in enumerate(self.options):
             if index == self.index:
