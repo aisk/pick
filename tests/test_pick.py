@@ -36,6 +36,12 @@ class TestPick(unittest.TestCase):
         lines, current_line = picker.get_lines()
         assert current_line == 1
 
+    def test_search(self):
+        options = ['aa', 'Ab', 'ac', 'b', 'c']
+        picker = Picker(options, search='a')
+        lines, current_line = picker.get_lines()
+        assert picker.options == ['aa', 'Ab', 'ac']
+
 
 if __name__ == '__main__':
     unittest.main()

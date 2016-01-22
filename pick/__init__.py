@@ -9,6 +9,7 @@ __all__ = ['Picker', 'pick']
 KEYS_ENTER = (curses.KEY_ENTER, ord('\n'), ord('\r'))
 KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
+KEYS_SEARCH = (ord('/'),)
 
 
 class Picker(object):
@@ -20,19 +21,25 @@ class Picker(object):
     :param default_index: (optional) set this if the default selected option is not the first one
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0):
+    def __init__(self, options, title=None, indicator='*', default_index=0, search=''):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
 
-        self.options = options
+        self._options = options
         self.title = title
         self.indicator = indicator
+        self.search = search
+        self._search_mode = False
 
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
 
         self.index = default_index
+
+    @property
+    def options(self):
+        return [opt for opt in self._options if self.search.lower() in opt.lower()]
 
     def move_up(self):
         self.index -= 1
@@ -81,6 +88,8 @@ class Picker(object):
         x, y = 1, 1  # start point
         max_y, max_x = self.screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
+        if self.search:
+            max_rows = max_rows - 1
 
         lines, current_line = self.get_lines()
 
@@ -98,18 +107,31 @@ class Picker(object):
             self.screen.addstr(y, x, line)
             y += 1
 
+        self.screen.addstr(max_y - 1, 1, self.search)
+
         self.screen.refresh()
 
     def run_loop(self):
         while True:
             self.draw()
             c = self.screen.getch()
+
+            if self._search_mode:
+                if c in KEYS_ENTER:
+                    self._search_mode = False
+                    continue
+                self.search += chr(c)
+
             if c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
                 return self.get_selected()
+            elif c in KEYS_SEARCH:
+                self.search = ''
+                self.index = 0
+                self._search_mode = not self._search_mode
 
     def config_curses(self):
         # use the default colors of the terminal
