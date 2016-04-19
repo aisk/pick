@@ -33,6 +33,10 @@ class Picker(object):
             raise ValueError('default_index should be less than the length of options')
 
         self.index = default_index
+        self.custom_handlers = {}
+
+    def register_custom_handler(self, key, func):
+        self.custom_handlers[key] = func
 
     def move_up(self):
         self.index -= 1
@@ -110,6 +114,10 @@ class Picker(object):
                 self.move_down()
             elif c in KEYS_ENTER:
                 return self.get_selected()
+            elif c in self.custom_handlers:
+                ret = self.custom_handlers[c](self)
+                if ret:
+                    return ret
 
     def config_curses(self):
         # use the default colors of the terminal
