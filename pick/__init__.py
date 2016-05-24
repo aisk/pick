@@ -99,7 +99,7 @@ class Picker(object):
         lines_to_draw = lines[scroll_top:scroll_top+max_rows]
 
         for line in lines_to_draw:
-            self.screen.addstr(y, x, line)
+            self.screen.addnstr(y, x, line, max_x-2)
             y += 1
 
         self.screen.refresh()
