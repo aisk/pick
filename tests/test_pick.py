@@ -39,8 +39,8 @@ class TestPick(unittest.TestCase):
     def test_choose_one(self):
         options = ['option1', 'option2', 'option3']
         picker = Picker(options)
-    	option1_index = options.index('option1')
-    	picker.chosen_options = [option1_index]
+        option1_index = options.index('option1')
+        picker.chosen_options = [option1_index]
         assert picker.get_chosen() == ('option1', option1_index)
 
     def test_choose_many(self):

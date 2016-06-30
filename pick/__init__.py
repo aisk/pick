@@ -165,12 +165,12 @@ class Picker(object):
         return curses.wrapper(self._start)
 
     def one(self):
-	self.multiselect_allow = False
-	return self.start()
+        self.multiselect_allow = False
+        return self.start()
 
     def many(self, min=1):
-	self.multiselect_allow = True
-	return self.start()
+        self.multiselect_allow = True
+        return self.start()
 
 def pick(options, title=None, indicator='*', default_index=0, min_select=0, chosen_indicator=curses.A_BOLD):
     """Construct and start a :class:`Picker <Picker>`.
@@ -180,6 +180,6 @@ def pick(options, title=None, indicator='*', default_index=0, min_select=0, chos
       >>> from pick import pick
       >>> title = 'Please choose an option: '
       >>> options = ['option1', 'option2', 'option3']
-      >>> option, index = pick(options, title)
+      >>> option, index = pick(options, title).one()
     """
     return Picker(options, title, indicator, default_index, min_select, chosen_indicator)
