@@ -39,9 +39,9 @@ class TestPick(unittest.TestCase):
     def test_chosen_options(self):
         options = ['option1', 'option2', 'option3']
         picker = Picker(options)
-	picker.chosen_options = [1]
-	print picker.get_chosen()
-        assert picker.get_chosen() == [('option2', 1)]
+	option2_index = options.index('option2')
+	picker.chosen_options = [option2_index]
+        assert picker.get_chosen() == [('option2', option2_index)]
 
 if __name__ == '__main__':
     unittest.main()
