@@ -36,6 +36,12 @@ class TestPick(unittest.TestCase):
         lines, current_line = picker.get_lines()
         assert current_line == 1
 
+    def test_chosen_options(self):
+        options = ['option1', 'option2', 'option3']
+        picker = Picker(options)
+	picker.chosen_options = [1]
+	print picker.get_chosen()
+        assert picker.get_chosen() == [('option2', 1)]
 
 if __name__ == '__main__':
     unittest.main()

@@ -18,10 +18,10 @@ class Picker(object):
     :param title: (optional) a title above options list
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
-    :param selected_indicator: (option) curses attribute to use when item has been selected
+    :param chosen_indicator: (option) curses attribute to use when item has been chosen
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, selected_indicator=curses.A_BOLD):
+    def __init__(self, options, title=None, indicator='*', default_index=0, chosen_indicator=curses.A_BOLD):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -33,10 +33,10 @@ class Picker(object):
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
 
-        self.selected_indicator = selected_indicator
+        self.chosen_indicator = chosen_indicator
 
         self.index = default_index
-        self.selected_lines = []
+        self.chosen_options = []
         self.custom_handlers = {}
 
     def register_custom_handler(self, key, func):
@@ -52,16 +52,21 @@ class Picker(object):
         if self.index >= len(self.options):
             self.index = 0
 
-    def select(self):
-        if self.index not in self.selected_lines:
-            self.selected_lines.append(self.index)
+    def choose(self):
+        if self.index not in self.chosen_options:
+            self.chosen_options.append(self.index)
         else:
-            self.selected_lines.remove(self.index)
+            self.chosen_options.remove(self.index)
 
     def get_selected(self):
-        """return the current selected options as a list of tuples: (option, index)
+        """return the current selected option as a tuple: (option, index)
         """
-        return [(self.options[index], index) for index in self.selected_lines]
+        return self.options[self.index], self.index
+
+    def get_chosen(self):
+        """return the current chosen options as a list of tuples: (option, index)
+        """
+        return [(self.options[index], index) for index in self.chosen_options]
 
     def get_title_lines(self):
         if self.title:
@@ -111,7 +116,7 @@ class Picker(object):
 
         for line in lines_to_draw:
             current_index = option_lines.index(line) if line in option_lines else -1
-            self.screen.addnstr(y, x, line, max_x-2, self.selected_indicator if current_index in self.selected_lines else curses.A_NORMAL)
+            self.screen.addnstr(y, x, line, max_x-2, self.chosen_indicator if current_index in self.chosen_options else curses.A_NORMAL)
             y += 1
 
         self.screen.refresh()
@@ -125,9 +130,9 @@ class Picker(object):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_SELECT:
-                self.select()
+                self.choose()
             elif c in KEYS_ENTER:
-                return self.get_selected()
+                return self.get_chosen()
             elif c in self.custom_handlers:
                 ret = self.custom_handlers[c](self)
                 if ret:
@@ -149,7 +154,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, indicator='*', default_index=0, selected_indicator=curses.A_BOLD):
+def pick(options, title=None, indicator='*', default_index=0, chosen_indicator=curses.A_BOLD):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -159,5 +164,5 @@ def pick(options, title=None, indicator='*', default_index=0, selected_indicator
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, selected_indicator)
+    picker = Picker(options, title, indicator, default_index, chosen_indicator)
     return picker.start()
