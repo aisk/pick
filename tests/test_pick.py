@@ -46,10 +46,10 @@ class TestPick(unittest.TestCase):
     def test_choose_many(self):
         options = ['option1', 'option2', 'option3']
         picker = Picker(options)
-    	picker.multiselect_allow = True
-    	option2_index = options.index('option2')
-    	option3_index = options.index('option3')
-    	picker.chosen_options = [option2_index, option3_index]
+        picker.multiselect_allow = True
+        option2_index = options.index('option2')
+        option3_index = options.index('option3')
+        picker.chosen_options = [option2_index, option3_index]
         assert picker.get_chosen() == [('option2', option2_index), ('option3', option3_index)]
 
 if __name__ == '__main__':
