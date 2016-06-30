@@ -20,7 +20,7 @@ list in the terminal. See it in action:
 
     >>> title = 'Please choose your favorite programming language: '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
-    >>> index, option = pick(options, title, min_select=1).one()
+    >>> option, index = pick(options, title, min_select=1).one()
     >>> chosen_options = pick(options, title).many()
 
 #### Options
