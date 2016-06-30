@@ -20,9 +20,8 @@ list in the terminal. See it in action:
 
     >>> title = 'Please choose your favorite programming language: '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
-    >>> chosen_options = pick(options, title)
-    >>> print chosen_options
-    >>> [('Java', 0), ('PHP', 3), ('Haskell', 6)]
+    >>> index, option = pick(options, title, min_select=1).one()
+    >>> chosen_options = pick(options, title).many()
 
 #### Options
 
@@ -30,6 +29,7 @@ list in the terminal. See it in action:
 * `title`: (optional) a title above options list
 * `indicator`: (optional) custom the selection indicator, defaults to *
 * `default_index`: (optional) set this if the default selected option is not the first one
+* `min_select`: (optional) minimum number of items that should be selected before returning
 * `chosen_indicator`: (optional) curses attribute to use when item has been chosen
 
 #### Register custom handlers
@@ -47,4 +47,3 @@ sometimes you may need to register custom handlers to specific keys, you can use
 * the custom handler will be called with the `picker` instance as it's parameter.
 * the custom handler should either return a list of a two element tuple, or None.
 * if None is returned, the picker would continue to run, otherwise the picker will stop and return the list of tuples.
-

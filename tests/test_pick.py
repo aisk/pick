@@ -36,12 +36,21 @@ class TestPick(unittest.TestCase):
         lines, current_line = picker.get_lines()
         assert current_line == 1
 
-    def test_chosen_options(self):
+    def test_choose_one(self):
         options = ['option1', 'option2', 'option3']
         picker = Picker(options)
-	option2_index = options.index('option2')
-	picker.chosen_options = [option2_index]
-        assert picker.get_chosen() == [('option2', option2_index)]
+    	option1_index = options.index('option1')
+    	picker.chosen_options = [option1_index]
+        assert picker.get_chosen() == ('option1', option1_index)
+
+    def test_choose_many(self):
+        options = ['option1', 'option2', 'option3']
+        picker = Picker(options)
+    	picker.multiselect_allow = True
+    	option2_index = options.index('option2')
+    	option3_index = options.index('option3')
+    	picker.chosen_options = [option2_index, option3_index]
+        assert picker.get_chosen() == [('option2', option2_index), ('option3', option3_index)]
 
 if __name__ == '__main__':
     unittest.main()

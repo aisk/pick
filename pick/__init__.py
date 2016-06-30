@@ -18,10 +18,11 @@ class Picker(object):
     :param title: (optional) a title above options list
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
+    :param min_select: (optional) minimum number of items that should be selected
     :param chosen_indicator: (optional) curses attribute to use when item has been chosen
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, chosen_indicator=curses.A_BOLD):
+    def __init__(self, options, title=None, indicator='*', default_index=0, min_select=0, chosen_indicator=curses.A_BOLD):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -33,9 +34,12 @@ class Picker(object):
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
 
+        self.min_select = min_select
         self.chosen_indicator = chosen_indicator
 
+        self.multiselect_allow = False
         self.index = default_index
+        self.error = None
         self.chosen_options = []
         self.custom_handlers = {}
 
@@ -64,9 +68,9 @@ class Picker(object):
         return self.options[self.index], self.index
 
     def get_chosen(self):
-        """return the current chosen options as a list of tuples: (option, index)
+        """return the current chosen options as a list of tuples [(option, index)]
         """
-        return [(self.options[index], index) for index in self.chosen_options]
+        return [(self.options[index], index) for index in self.chosen_options] if self.multiselect_allow else self.get_selected()
 
     def get_title_lines(self):
         if self.title:
@@ -119,6 +123,9 @@ class Picker(object):
             self.screen.addnstr(y, x, line, max_x-2, self.chosen_indicator if current_index in self.chosen_options else curses.A_NORMAL)
             y += 1
 
+        if self.error:
+            self.screen.addstr(y + 1, x, self.error, curses.A_STANDOUT)
+
         self.screen.refresh()
 
     def run_loop(self):
@@ -129,10 +136,15 @@ class Picker(object):
                 self.move_up()
             elif c in KEYS_DOWN:
                 self.move_down()
-            elif c in KEYS_SELECT:
+            elif c in KEYS_SELECT and self.multiselect_allow:
+                self.error = None
                 self.choose()
             elif c in KEYS_ENTER:
-                return self.get_chosen()
+                chosen = self.get_chosen()
+                if self.multiselect_allow and len(chosen) < self.min_select:
+                    self.error = 'Please select at least {0} items'.format(self.min_select)
+                else:
+                    return chosen
             elif c in self.custom_handlers:
                 ret = self.custom_handlers[c](self)
                 if ret:
@@ -147,14 +159,20 @@ class Picker(object):
     def _start(self, screen):
         self.screen = screen
         self.config_curses()
-        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_WHITE)
         return self.run_loop()
 
     def start(self):
         return curses.wrapper(self._start)
 
+    def one(self):
+	self.multiselect_allow = False
+	return self.start()
 
-def pick(options, title=None, indicator='*', default_index=0, chosen_indicator=curses.A_BOLD):
+    def many(self, min=1):
+	self.multiselect_allow = True
+	return self.start()
+
+def pick(options, title=None, indicator='*', default_index=0, min_select=0, chosen_indicator=curses.A_BOLD):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -164,5 +182,4 @@ def pick(options, title=None, indicator='*', default_index=0, chosen_indicator=c
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, chosen_indicator)
-    return picker.start()
+    return Picker(options, title, indicator, default_index, min_select, chosen_indicator)
