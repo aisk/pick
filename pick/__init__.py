@@ -18,7 +18,7 @@ class Picker(object):
     :param title: (optional) a title above options list
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
-    :param chosen_indicator: (option) curses attribute to use when item has been chosen
+    :param chosen_indicator: (optional) curses attribute to use when item has been chosen
     """
 
     def __init__(self, options, title=None, indicator='*', default_index=0, chosen_indicator=curses.A_BOLD):
