@@ -6,4 +6,5 @@ python:
     - "3.4"
     - "3.5"
 
-script: nosetests
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
