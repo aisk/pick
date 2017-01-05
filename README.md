@@ -1,4 +1,4 @@
-pick [![Build Status](https://travis-ci.org/wong2/pick.svg?branch=master)](https://travis-ci.org/wong2/pick)
+pick [![Build Status](https://travis-ci.org/wong2/pick.svg?branch=master)](https://travis-ci.org/wong2/pick) [![PyPI](https://img.shields.io/pypi/v/pick.svg)](https://pypi.python.org/pypi/pick)
 ====
 
 **pick** is a small python library to help you create curses based interactive selection
