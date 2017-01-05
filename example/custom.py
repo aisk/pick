@@ -13,5 +13,5 @@ options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
 
 picker = Picker(options, title)
 picker.register_custom_handler(curses.KEY_LEFT, go_back)
-option, index = picker.start()
+option, index = picker.one()
 print(option, index)
