@@ -21,12 +21,24 @@ list in the terminal. See it in action:
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
     >>> option, index = pick(options, title)
 
+
+**pick** multiselect example:
+
+    >>> from pick import pick
+
+    >>> title = 'Please choose your favorite programming language (press SPACE to mark, ENTER to continue): '
+    >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
+    >>> selected = pick(options, title, True)
+    >>> print selected
+
 #### Options
 
 * `options`: a list of options to choose from
 * `title`: (optional) a title above options list
+* `multi_select`: (optional), if set to True its possible to select multiple items by hitting SPACE
 * `indicator`: (optional) custom the selection indicator, defaults to *
 * `default_index`: (optional) set this if the default selected option is not the first one
+
 
 #### Register custom handlers
 
