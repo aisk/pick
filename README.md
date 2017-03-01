@@ -28,7 +28,7 @@ list in the terminal. See it in action:
 
     >>> title = 'Please choose your favorite programming language (press SPACE to mark, ENTER to continue): '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
-    >>> selected = pick(options, title, True)
+    >>> selected = pick(options, title, multi_select=True)
     >>> print selected
 
 #### Options

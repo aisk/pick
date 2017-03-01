@@ -9,7 +9,7 @@ __all__ = ['Picker', 'pick']
 KEYS_ENTER = (curses.KEY_ENTER, ord('\n'), ord('\r'))
 KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
-KEYS_SELECT = (ord(' '), ' ')
+KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
 class Picker(object):
     """The :class:`Picker <Picker>` object
@@ -21,7 +21,7 @@ class Picker(object):
     :param default_index: (optional) set this if the default selected option is not the first one
     """
 
-    def __init__(self, options, title=None, multi_select=False, indicator='*', default_index=0):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -154,6 +154,7 @@ class Picker(object):
         # hide the cursor
         curses.curs_set(0)
         #add some color for multi_select
+        #@todo make colors configurable
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_WHITE)
 
     def _start(self, screen):
@@ -165,7 +166,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, multi_select=False, indicator='*', default_index=0):
+def pick(options, title=None, indicator='*', default_index=0, multi_select=False):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -175,5 +176,5 @@ def pick(options, title=None, multi_select=False, indicator='*', default_index=0
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, multi_select, indicator, default_index)
+    picker = Picker(options, title, indicator, default_index, multi_select)
     return picker.start()
