@@ -39,7 +39,7 @@ list in the terminal. See it in action:
 
 **outputs**
 
-    >>> [ (Java, 0), (C++, 4) ]
+    >>> [('Java', 0), ('C++', 4)]
 
 
 #### Options
