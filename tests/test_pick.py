@@ -36,6 +36,17 @@ class TestPick(unittest.TestCase):
         lines, current_line = picker.get_lines()
         assert current_line == 1
 
+    def test_multi_select(self):
+        title = 'Please choose an option: '
+        options = ['option1', 'option2', 'option3']
+        picker = Picker(options, title, multi_select=True)
+        assert picker.get_selected() == []
+        picker.mark_index()
+        assert picker.get_selected() == [('option1', 0)]
+        picker.move_down()
+        picker.mark_index()
+        assert picker.get_selected() == [('option1', 0), ('option2', 1)]
+
 
 if __name__ == '__main__':
     unittest.main()
