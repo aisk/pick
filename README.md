@@ -20,7 +20,13 @@ list in the terminal. See it in action:
     >>> title = 'Please choose your favorite programming language: '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
     >>> option, index = pick(options, title)
+    >>> print option
+    >>> print index
 
+**outputs**
+ 
+    >>> C++ 
+    >>> 4
 
 **pick** multiselect example:
 
@@ -32,7 +38,7 @@ list in the terminal. See it in action:
     >>> print selected
 
 **outputs**
- 
+
     >>> [ (Java, 0), (C++, 4) ]
 
 
