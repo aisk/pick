@@ -30,7 +30,10 @@ list in the terminal. See it in action:
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
     >>> selected = pick(options, title, multi_select=True)
     >>> print selected
-    >>> **output:** [ (Java, 0), (C++, 4) ]
+
+**outputs**
+ 
+    >>> [ (Java, 0), (C++, 4) ]
 
 
 #### Options
