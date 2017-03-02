@@ -83,12 +83,9 @@ class Picker(object):
             else:
                 prefix = len(self.indicator) * ' '
 
-            if self.multi_select:
-                if index in self.all_selected:
-                    format = curses.color_pair(1)
-                else:
-                    format = 0
-                line = ('{0} {1}'.format(prefix, option),format)
+            if self.multi_select and index in self.all_selected:
+                format = curses.color_pair(1)
+                line = ('{0} {1}'.format(prefix, option), format)
             else:
                 line = '{0} {1}'.format(prefix, option)
             lines.append(line)
