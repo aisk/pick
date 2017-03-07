@@ -137,6 +137,8 @@ class Picker(object):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
+                if self.multi_select and len(self.all_selected) == 0:
+                    continue
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multi_select:
                 self.mark_index()
