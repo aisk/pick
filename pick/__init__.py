@@ -2,7 +2,6 @@
 
 import curses
 
-
 __all__ = ['Picker', 'pick']
 
 
@@ -35,6 +34,9 @@ class Picker(object):
 
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
+
+        if multi_select and min_count_selected > len(options):
+            raise ValueError('min_count_selected is bigger than the available options, you will not be able to make any selection')
 
         self.index = default_index
         self.custom_handlers = {}
@@ -138,7 +140,7 @@ class Picker(object):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
-                if self.multi_select and len(self.all_selected) >= self.min_count_selected:
+                if self.multi_select and len(self.all_selected) < self.min_count_selected:
                     continue
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multi_select:
