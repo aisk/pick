@@ -21,7 +21,7 @@ class Picker(object):
     :param default_index: (optional) set this if the default selected option is not the first one
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_count_selected=0):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -30,6 +30,7 @@ class Picker(object):
         self.title = title
         self.indicator = indicator
         self.multi_select = multi_select
+        self.min_count_selected = min_count_selected
         self.all_selected = []
 
         if default_index >= len(options):
@@ -137,7 +138,7 @@ class Picker(object):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
-                if self.multi_select and len(self.all_selected) == 0:
+                if self.multi_select and len(self.all_selected) >= self.min_count_selected:
                     continue
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multi_select:
@@ -165,7 +166,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, indicator='*', default_index=0, multi_select=False):
+def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_count_selected=0):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -175,5 +176,5 @@ def pick(options, title=None, indicator='*', default_index=0, multi_select=False
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, multi_select)
+    picker = Picker(options, title, indicator, default_index, multi_select, min_count_selected)
     return picker.start()
