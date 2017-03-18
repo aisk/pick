@@ -34,7 +34,7 @@ list in the terminal. See it in action:
 
     >>> title = 'Please choose your favorite programming language (press SPACE to mark, ENTER to continue): '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
-    >>> selected = pick(options, title, multi_select=True, min_count_selected=1)
+    >>> selected = pick(options, title, multi_select=True, min_selection_count=1)
     >>> print selected
 
 **outputs**
@@ -49,7 +49,7 @@ list in the terminal. See it in action:
 * `indicator`: (optional) custom the selection indicator, defaults to *
 * `default_index`: (optional) set this if the default selected option is not the first one
 * `multi_select`: (optional), if set to True its possible to select multiple items by hitting SPACE
-* `min_count_selected`: (optional) for multi select feature to dictate a minimum of selected items before continuing
+* `min_selection_count`: (optional) for multi select feature to dictate a minimum of selected items before continuing
 
 #### Register custom handlers
 
