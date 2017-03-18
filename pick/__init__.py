@@ -20,7 +20,7 @@ class Picker(object):
     :param default_index: (optional) set this if the default selected option is not the first one
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_count_selected=0):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -29,14 +29,14 @@ class Picker(object):
         self.title = title
         self.indicator = indicator
         self.multi_select = multi_select
-        self.min_count_selected = min_count_selected
+        self.min_selection_count = min_selection_count
         self.all_selected = []
 
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
 
-        if multi_select and min_count_selected > len(options):
-            raise ValueError('min_count_selected is bigger than the available options, you will not be able to make any selection')
+        if multi_select and min_selection_count > len(options):
+            raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
 
         self.index = default_index
         self.custom_handlers = {}
@@ -140,7 +140,7 @@ class Picker(object):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
-                if self.multi_select and len(self.all_selected) < self.min_count_selected:
+                if self.multi_select and len(self.all_selected) < self.min_selection_count:
                     continue
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multi_select:
@@ -168,7 +168,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_count_selected=0):
+def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -178,5 +178,5 @@ def pick(options, title=None, indicator='*', default_index=0, multi_select=False
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, multi_select, min_count_selected)
+    picker = Picker(options, title, indicator, default_index, multi_select, min_selection_count)
     return picker.start()
