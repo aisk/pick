@@ -24,8 +24,8 @@ list in the terminal. See it in action:
     >>> print index
 
 **outputs**
- 
-    >>> C++ 
+
+    >>> C++
     >>> 4
 
 **pick** multiselect example:
@@ -50,10 +50,11 @@ list in the terminal. See it in action:
 * `default_index`: (optional) set this if the default selected option is not the first one
 * `multi_select`: (optional), if set to True its possible to select multiple items by hitting SPACE
 * `min_selection_count`: (optional) for multi select feature to dictate a minimum of selected items before continuing
+* `options_map`: (optional) a mapping function to pass each option through before displaying
 
 #### Register custom handlers
 
-sometimes you may need to register custom handlers to specific keys, you can use the `register_custom_handler` API:
+sometimes you may need to register custom handlers for specific keyboard keys, you can use the `register_custom_handler` API:
 
     >>> from pick import Picker
     >>> title, options = 'Title', ['Option1', 'Option2']
@@ -67,3 +68,32 @@ sometimes you may need to register custom handlers to specific keys, you can use
 * the custom handler should either return a two element tuple, or None.
 * if None is returned, the picker would continue to run, otherwise the picker will stop and return the tuple.
 
+#### Options Map
+
+If your options are not in a format that you want displayed (such as a dictionary), you can pass in a mapping function which each option will be run through. The return value of the function will be displayed.
+
+* the selected option returned will be the original value and not the displayed return result from the `options_map` function.
+
+**pick** options map example:
+
+    >>> from pick import pick
+
+    >>> title = 'Please choose an option: '
+    >>> options = [{'label': 'option1'}, {'label': 'option2'}, {'label': 'option3'}]
+
+    >>> def get_label(option): return option.get('label')
+
+    >>> selected = pick(options, title, indicator='*', options_map=get_label)
+    >>> print selected
+
+**displays**
+
+    Please choose an option:
+
+    * option1
+      option2
+      option3
+
+**outputs**
+
+    >>> ({ 'label': 'option1' }, 0)
