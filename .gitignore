@@ -12,3 +12,6 @@ __pycache__/
 # due to using tox and pytest
 .tox
 .cache
+
+# mac
+.DS_STORE

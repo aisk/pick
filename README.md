@@ -51,6 +51,8 @@ list in the terminal. See it in action:
 * `multi_select`: (optional), if set to True its possible to select multiple items by hitting SPACE
 * `min_selection_count`: (optional) for multi select feature to dictate a minimum of selected items before continuing
 * `options_map`: (optional) a mapping function to pass each option through before displaying
+* `multi_select_foreground_color`: (optional) forground color of a selected option within multi_select mode
+* `multi_select_background_color`: (optional) background color of a selected option within multi_select mode
 
 #### Register custom handlers
 
@@ -97,3 +99,20 @@ If your options are not in a format that you want displayed (such as a dictionar
 **outputs**
 
     >>> ({ 'label': 'option1' }, 0)
+
+### Multi-Select Colors
+
+Using the `multi_select_foreground_color` and `multi_select_background_color` options, you can specify the colors that are used when a user selects an option as part of the multi-select mode.
+
+The accepted colors are any of the [curses](https://docs.python.org/2/library/curses.html) predefined color constants, passed as a string:
+```
+'COLOR_BLACK'
+'COLOR_BLUE'
+'COLOR_CYAN'
+'COLOR_GREEN'
+'COLOR_MAGENTA'
+'COLOR_RED'
+'COLOR_WHITE'
+'COLOR_YELLOW'
+```
+

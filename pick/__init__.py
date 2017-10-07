@@ -10,6 +10,18 @@ KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
+MULTI_SELECT_COLOR_PAIR_NUMBER = 1
+COLORS = {
+    'COLOR_BLACK': curses.COLOR_BLACK,
+    'COLOR_BLUE': curses.COLOR_BLUE,
+    'COLOR_CYAN': curses.COLOR_CYAN,
+    'COLOR_GREEN': curses.COLOR_GREEN,
+    'COLOR_MAGENTA': curses.COLOR_MAGENTA,
+    'COLOR_RED': curses.COLOR_RED,
+    'COLOR_WHITE': curses.COLOR_WHITE,
+    'COLOR_YELLOW': curses.COLOR_YELLOW
+}
+
 class Picker(object):
     """The :class:`Picker <Picker>` object
 
@@ -19,9 +31,11 @@ class Picker(object):
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
     :param options_map: (optional) a mapping function to pass each option through before displaying
+    :param multi_select_foreground_color: (optional) forground color of a selected option within multi_select mode
+    :param multi_select_background_color: (optional) background color of a selected option within multi_select mode
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map=None):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map=None, multi_select_foreground_color='COLOR_GREEN', multi_select_background_color='COLOR_WHITE'):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -43,6 +57,14 @@ class Picker(object):
         if options_map is not None and not callable(options_map):
             raise ValueError('options_map must be a callable function')
 
+        if multi_select_foreground_color and multi_select_foreground_color not in COLORS:
+            raise ValueError('multi_select_foreground_color must be one of: [\'{0}\']'.format('\', \''.join(list(COLORS))))
+
+        if multi_select_background_color and multi_select_background_color not in COLORS:
+            raise ValueError('multi_select_background_color must be one of: [\'{0}\']'.format('\', \''.join(list(COLORS))))
+
+        self.multi_select_foreground_color = COLORS[multi_select_foreground_color]
+        self.multi_select_background_color = COLORS[multi_select_background_color]
         self.index = default_index
         self.custom_handlers = {}
 
@@ -96,7 +118,7 @@ class Picker(object):
                 prefix = len(self.indicator) * ' '
 
             if self.multi_select and index in self.all_selected:
-                format = curses.color_pair(1)
+                format = curses.color_pair(MULTI_SELECT_COLOR_PAIR_NUMBER)
                 line = ('{0} {1}'.format(prefix, option), format)
             else:
                 line = '{0} {1}'.format(prefix, option)
@@ -165,8 +187,7 @@ class Picker(object):
         # hide the cursor
         curses.curs_set(0)
         #add some color for multi_select
-        #@todo make colors configurable
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_WHITE)
+        curses.init_pair(MULTI_SELECT_COLOR_PAIR_NUMBER, self.multi_select_foreground_color, self.multi_select_background_color)
 
     def _start(self, screen):
         self.screen = screen
@@ -177,7 +198,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map=None):
+def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map=None, multi_select_foreground_color='COLOR_GREEN', multi_select_background_color='COLOR_WHITE'):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -187,5 +208,5 @@ def pick(options, title=None, indicator='*', default_index=0, multi_select=False
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, multi_select, min_selection_count, options_map)
+    picker = Picker(options, title, indicator, default_index, multi_select, min_selection_count, options_map, multi_select_foreground_color, multi_select_background_color)
     return picker.start()
