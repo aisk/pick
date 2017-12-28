@@ -1,13 +1,13 @@
 #-*-coding:utf-8-*-
 
-import curses
+import curses, curses.ascii
 
 __all__ = ['Picker', 'pick']
 
 
-KEYS_ENTER = (curses.KEY_ENTER, ord('\n'), ord('\r'))
-KEYS_UP = (curses.KEY_UP, ord('k'))
-KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
+KEYS_ENTER = (curses.KEY_ENTER, ord('\n'),ord('\r'))
+KEYS_UP = (curses.KEY_UP, ord('k'), ord(curses.ascii.ctrl('p')))
+KEYS_DOWN = (curses.KEY_DOWN, ord('j'), ord(curses.ascii.ctrl('n')))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
 class Picker(object):
