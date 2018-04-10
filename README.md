@@ -10,6 +10,8 @@ list in the terminal. See it in action:
 ### Installation
 
     $ pip install pick
+    
+Note for Windows: curses wheels can be obtained from http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses, then install it with pip, for example: `pip install curses-2.2-cp27-none-win_amd64.whl`
 
 ### Usage
 
