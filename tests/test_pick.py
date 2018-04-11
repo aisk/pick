@@ -47,13 +47,13 @@ class TestPick(unittest.TestCase):
         picker.mark_index()
         assert picker.get_selected() == [('option1', 0), ('option2', 1)]
 
-    def test_options_map(self):
+    def test_options_map_func(self):
         title = 'Please choose an option: '
         options = [{'label': 'option1'}, {'label': 'option2'}, {'label': 'option3'}]
 
         def get_label(option): return option.get('label')
 
-        picker = Picker(options, title, indicator='*', options_map=get_label)
+        picker = Picker(options, title, indicator='*', options_map_func=get_label)
         lines, current_line = picker.get_lines()
         assert lines == [title, '', '* option1', '  option2', '  option3']
         assert picker.get_selected() == ({ 'label': 'option1' }, 0)

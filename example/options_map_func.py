@@ -16,5 +16,6 @@ def get_description_for_display(option):
     # format the option data for display
     return '{0} (grow on {1})'.format(option.get('name'), option.get('grow_on'))
 
-option, index = pick(options, title, indicator='=>', options_map=get_description_for_display)
+option, index = pick(options, title, indicator='=>', options_map_func=get_description_for_display)
+
 print(option, index)

@@ -18,10 +18,10 @@ class Picker(object):
     :param multi_select: (optional) if true its possible to select multiple values by hitting SPACE, defaults to False
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
-    :param options_map: (optional) a mapping function to pass each option through before displaying
+    :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map=None):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map_func=None):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -31,7 +31,7 @@ class Picker(object):
         self.indicator = indicator
         self.multi_select = multi_select
         self.min_selection_count = min_selection_count
-        self.options_map = options_map
+        self.options_map_func = options_map_func
         self.all_selected = []
 
         if default_index >= len(options):
@@ -40,8 +40,8 @@ class Picker(object):
         if multi_select and min_selection_count > len(options):
             raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
 
-        if options_map is not None and not callable(options_map):
-            raise ValueError('options_map must be a callable function')
+        if options_map_func is not None and not callable(options_map_func):
+            raise ValueError('options_map_func must be a callable function')
 
         self.index = default_index
         self.custom_handlers = {}
@@ -87,8 +87,8 @@ class Picker(object):
         lines = []
         for index, option in enumerate(self.options):
             # pass the option through the options map of one was passed in
-            if self.options_map:
-                option = self.options_map(option)
+            if self.options_map_func:
+                option = self.options_map_func(option)
 
             if index == self.index:
                 prefix = self.indicator
@@ -177,7 +177,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map=None):
+def pick(options, title=None, indicator='*', default_index=0, multi_select=False, min_selection_count=0, options_map_func=None):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -187,5 +187,5 @@ def pick(options, title=None, indicator='*', default_index=0, multi_select=False
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, multi_select, min_selection_count, options_map)
+    picker = Picker(options, title, indicator, default_index, multi_select, min_selection_count, options_map_func)
     return picker.start()
