@@ -8,11 +8,11 @@ python:
 
 install:
     - python setup.py install
-    - pip install readme_renderer
+    - if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then pip install readme_renderer; fi
 
 script:
     - nosetests
-    - python setup.py check -r -s
+    - if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then python setup.py check -r -s; fi
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
