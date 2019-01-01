@@ -12,7 +12,7 @@ setup(
     name='pick',
     version='0.6.4',
     description='pick an option in the terminal with a simple GUI',
-    long_description=fread('README.md'),
+    long_description=fread('README.rst'),
     keywords='terminal gui',
     url='https://github.com/wong2/pick',
     author='wong2',
