@@ -160,13 +160,17 @@ class Picker(object):
                     return ret
 
     def config_curses(self):
-        # use the default colors of the terminal
-        curses.use_default_colors()
-        # hide the cursor
-        curses.curs_set(0)
-        #add some color for multiselect
-        #@todo make colors configurable
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_WHITE)
+        try:
+            # use the default colors of the terminal
+            curses.use_default_colors()
+            # hide the cursor
+            curses.curs_set(0)
+            #add some color for multi_select
+            #@todo make colors configurable
+            curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_WHITE)
+        except:
+            # Curses failed to initialize color support, eg. when TERM=vt100
+            curses.initscr()
 
     def _start(self, screen):
         self.screen = screen
