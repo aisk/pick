@@ -1,18 +1,20 @@
 language: python
 
+cache: pip
+
 python:
-    - "2.6"
     - "2.7"
     - "3.4"
     - "3.5"
+    - "3.6"
+    - "3.7"
+    - "3.8"
 
 install:
     - python setup.py install
-    - if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then pip install readme_renderer; fi
 
 script:
     - nosetests
-    - if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then python setup.py check -r -s; fi
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
