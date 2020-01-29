@@ -47,7 +47,7 @@ Usage
 
     >>> title = 'Please choose your favorite programming language (press SPACE to mark, ENTER to continue): '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
-    >>> selected = pick(options, title, multi_select=True, min_selection_count=1)
+    >>> selected = pick(options, title, multiselect=True, min_selection_count=1)
     >>> print(selected)
 
 **outputs**::
@@ -62,7 +62,7 @@ Options
 * ``title``: (optional) a title above options list
 * ``indicator``: (optional) custom the selection indicator, defaults to *
 * ``default_index``: (optional) set this if the default selected option is not the first one
-* ``multi_select``: (optional), if set to True its possible to select multiple items by hitting SPACE
+* ``multiselect``: (optional), if set to True its possible to select multiple items by hitting SPACE
 * ``min_selection_count``: (optional) for multi select feature to dictate a minimum of selected items before continuing
 * ``options_map_func``: (optional) a mapping function to pass each option through before displaying
 
