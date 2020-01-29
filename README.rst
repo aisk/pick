@@ -33,8 +33,8 @@ Usage
     >>> title = 'Please choose your favorite programming language: '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
     >>> option, index = pick(options, title)
-    >>> print option
-    >>> print index
+    >>> print(option)
+    >>> print(index)
 
 **outputs**::
 
@@ -48,7 +48,7 @@ Usage
     >>> title = 'Please choose your favorite programming language (press SPACE to mark, ENTER to continue): '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
     >>> selected = pick(options, title, multi_select=True, min_selection_count=1)
-    >>> print selected
+    >>> print(selected)
 
 **outputs**::
 
@@ -100,7 +100,7 @@ If your options are not in a format that you want displayed (such as a dictionar
     >>> def get_label(option): return option.get('label')
 
     >>> selected = pick(options, title, indicator='*', options_map_func=get_label)
-    >>> print selected
+    >>> print(selected)
 
 **displays**::
 
