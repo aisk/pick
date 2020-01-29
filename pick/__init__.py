@@ -29,7 +29,7 @@ class Picker(object):
         self.options = options
         self.title = title
         self.indicator = indicator
-        self.multiselect = multiselect || multi_select
+        self.multiselect = multiselect or multi_select
         self.min_selection_count = min_selection_count
         self.options_map_func = options_map_func
         self.all_selected = []
