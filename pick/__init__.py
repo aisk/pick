@@ -181,7 +181,7 @@ class Picker(object):
         return curses.wrapper(self._start)
 
 
-def pick(options, title=None, indicator='*', default_index=0, multiselect=False, min_selection_count=0, options_map_func=None):
+def pick(*args, **kwargs):
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -191,5 +191,5 @@ def pick(options, title=None, indicator='*', default_index=0, multiselect=False,
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(options, title, indicator, default_index, multiselect, min_selection_count, options_map_func)
+    picker = Picker(*args, **kwargs)
     return picker.start()
