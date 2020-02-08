@@ -21,7 +21,7 @@ class Picker(object):
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, options_map_func=None):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, max_selection_count=0, options_map_func=None):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -31,14 +31,18 @@ class Picker(object):
         self.indicator = indicator
         self.multiselect = multiselect or multi_select
         self.min_selection_count = min_selection_count
+        self.max_selection_count = max_selection_count
         self.options_map_func = options_map_func
         self.all_selected = []
 
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
 
-        if multiselect and min_selection_count > len(options):
-            raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
+        if multiselect:
+            if min_selection_count > len(options):
+                raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
+            if min_selection_count > max_selection_count:
+                raise ValueError('min_selection_count should be lower or equal to max_selection_count')
 
         if options_map_func is not None and not callable(options_map_func):
             raise ValueError('options_map_func must be a callable function')
@@ -149,7 +153,7 @@ class Picker(object):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
-                if self.multiselect and len(self.all_selected) < self.min_selection_count:
+                if self.multiselect and not (self.min_selection_count <= len(self.all_selected) <= self.max_selection_count):
                     continue
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multiselect:
