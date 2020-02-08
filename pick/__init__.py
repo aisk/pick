@@ -21,7 +21,7 @@ class Picker(object):
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, max_selection_count=0, options_map_func=None):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, max_selection_count=0, options_map_func=None, pre_select_all=False):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -33,7 +33,10 @@ class Picker(object):
         self.min_selection_count = min_selection_count
         self.max_selection_count = max_selection_count
         self.options_map_func = options_map_func
-        self.all_selected = []
+
+        if multiselect is False and pre_select_all is True:
+            raise ValueError('pre_select_all only works for multiple selections')
+        self.all_selected = list(range(len(options))) if pre_select_all else []
 
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
