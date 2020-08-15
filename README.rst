@@ -65,6 +65,7 @@ Options
 * ``multiselect``: (optional), if set to True its possible to select multiple items by hitting SPACE
 * ``min_selection_count``: (optional) for multi select feature to dictate a minimum of selected items before continuing
 * ``options_map_func``: (optional) a mapping function to pass each option through before displaying
+* ``initial_selection``: (optional) a list of indices of the options that should be initially selected
 
 Register custom handlers
 ------------------------

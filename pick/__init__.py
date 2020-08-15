@@ -19,9 +19,10 @@ class Picker(object):
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
+    :param initial_selection: (optional) a list of indices of the options that should be initially selected
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, options_map_func=None):
+    def __init__(self, options, title=None, indicator='*', default_index=None, multiselect=False, multi_select=False, min_selection_count=0, options_map_func=None, initial_selection=None):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -32,9 +33,8 @@ class Picker(object):
         self.multiselect = multiselect or multi_select
         self.min_selection_count = min_selection_count
         self.options_map_func = options_map_func
-        self.all_selected = []
 
-        if default_index >= len(options):
+        if (default_index or 0) >= len(options):
             raise ValueError('default_index should be less than the length of options')
 
         if multiselect and min_selection_count > len(options):
@@ -43,8 +43,20 @@ class Picker(object):
         if options_map_func is not None and not callable(options_map_func):
             raise ValueError('options_map_func must be a callable function')
 
-        self.index = default_index
+        self.index = (default_index or 0)
         self.custom_handlers = {}
+
+        if initial_selection is None:
+            self.all_selected = []
+        else:
+            self.all_selected = sorted(set(initial_selection))
+            if any((i >= len(options)) for i in self.all_selected):
+                raise ValueError('initial_selection values should be less than the length of options')
+            if self.all_selected:
+                if len(self.all_selected) > 1 and not self.multiselect:
+                    raise ValueError('initial_selection cannot have more than one index without multiselect')
+                if default_index is None:
+                    self.index = self.all_selected[0]
 
     def register_custom_handler(self, key, func):
         self.custom_handlers[key] = func
