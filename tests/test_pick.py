@@ -45,7 +45,7 @@ class TestPick(unittest.TestCase):
     def test_multi_select(self):
         title = 'Please choose an option: '
         options = ['option1', 'option2', 'option3']
-        picker = Picker(options, title, multi_select=True, min_selection_count=1)
+        picker = Picker(options, title, multiselect=True, min_selection_count=1)
         assert picker.get_selected() == []
         picker.mark_index()
         assert picker.get_selected() == [('option1', 0)]
