@@ -16,11 +16,17 @@ class TestPick(unittest.TestCase):
         picker.move_down()
         assert picker.get_selected() == ('option2', 1)
 
-    def test_default_index(self):
+    def test_default_index__custom(self):
         title = 'Please choose an option: '
         options = ['option1', 'option2', 'option3']
         picker = Picker(options, title, default_index=1)
         assert picker.get_selected() == ('option2', 1)
+
+    def test_default_index__default(self):
+        title = 'Please choose an option: '
+        options = ['option1', 'option2', 'option3']
+        picker = Picker(options, title)
+        assert picker.get_selected() == ('option1', 0)
 
     def test_get_lines(self):
         title = 'Please choose an option: '
