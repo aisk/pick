@@ -19,6 +19,7 @@ setup(
     author_email='wonderfuly@gmail.com',
     license='MIT',
     packages=['pick'],
+    install_requires=['windows-curses; platform_system=="Windows"'],
     tests_require=['nose'],
     classifiers=[
         'Development Status :: 4 - Beta',

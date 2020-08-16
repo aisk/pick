@@ -21,8 +21,6 @@ Installation
 
     $ pip install pick
 
-note for Windows users: run ``pip install windows-curses`` to enable curses module support.
-
 Usage
 -----
 
