@@ -10,7 +10,7 @@ def fread(fname):
 
 setup(
     name='pick',
-    version='0.6.7',
+    version='1.0.0',
     description='pick an option in the terminal with a simple GUI',
     long_description=fread('README.rst'),
     keywords='terminal gui',
@@ -19,6 +19,7 @@ setup(
     author_email='wonderfuly@gmail.com',
     license='MIT',
     packages=['pick'],
+    python_requires='>=3.5',
     install_requires=['windows-curses; platform_system=="Windows"'],
     tests_require=['nose'],
     classifiers=[
@@ -26,10 +27,10 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5'
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3 :: Only',
     ]
 )
