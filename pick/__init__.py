@@ -19,9 +19,11 @@ class Picker(object):
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
+    :param select_all: (optional) if true and multiselect is true, provides a 'SELECT ALL' Option
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, options_map_func=None):
+    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, 
+        min_selection_count=0, options_map_func=None, select_all=None):
 
         if len(options) == 0:
             raise ValueError('options should not be an empty list')
@@ -33,6 +35,10 @@ class Picker(object):
         self.min_selection_count = min_selection_count
         self.options_map_func = options_map_func
         self.all_selected = []
+        self.select_all = select_all
+        
+        if not self.multiselect and self.select_all:
+            raise ValueError("cannot use select all option if multiselect isn't enabled")
 
         if default_index >= len(options):
             raise ValueError('default_index should be less than the length of options')
@@ -53,15 +59,25 @@ class Picker(object):
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
+            self.index += 1 if self.select_all else 0 # to account for the select all option
 
     def move_down(self):
         self.index += 1
-        if self.index >= len(self.options):
+
+        end = len(self.options)
+        end += 1 if self.select_all else 0 # to account for the select all option
+
+        if self.index >= end:
             self.index = 0
 
     def mark_index(self):
-        if self.multiselect:
-            if self.index in self.all_selected:
+        if self.multiselect:   
+            if self.select_all and self.index == 0: # if we are using the select all or deselect
+                if len(self.all_selected) < len(self.options): 
+                    self.all_selected = [i for i in range(1,len(self.options) + 1)] # select all options
+                else:
+                    self.all_selected = [] # deselect all options
+            elif self.index in self.all_selected:
                 self.all_selected.remove(self.index)
             else:
                 self.all_selected.append(self.index)
@@ -72,8 +88,12 @@ class Picker(object):
         """
         if self.multiselect:
             return_tuples = []
-            for selected in self.all_selected:
-                return_tuples.append((self.options[selected], selected))
+            if self.select_all:
+                for selected in self.all_selected: # if we are using select all, -1 accounts for the select all option
+                    return_tuples.append((self.options[selected - 1], selected - 1))
+            else:
+                for selected in self.all_selected:
+                    return_tuples.append((self.options[selected], selected))
             return return_tuples
         else:
             return self.options[self.index], self.index
@@ -85,7 +105,24 @@ class Picker(object):
 
     def get_option_lines(self):
         lines = []
-        for index, option in enumerate(self.options):
+
+        # add zeroth option for select/deselect all
+        # only shows deselect all if the # of selected options equals the # of options
+        if self.select_all:
+            if 0 == self.index: # if cursor is on this option
+                prefix = self.indicator
+            else:
+                prefix = len(self.indicator) * ' '
+
+            if len(self.all_selected) < len(self.options):
+                option = 'SELECT ALL'
+            else:
+                option = 'DESELECT ALL'
+
+            lines.append('{0} {1}'.format(prefix, option))
+        
+        # options start from 1 if there is a select all option
+        for index, option in enumerate(self.options, 1 if self.select_all else 0):
             # pass the option through the options map of one was passed in
             if self.options_map_func:
                 option = self.options_map_func(option)
