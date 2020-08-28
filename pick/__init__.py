@@ -95,6 +95,8 @@ class Picker(object):
             else:
                 prefix = len(self.indicator) * ' '
 
+            option = self.add_multiline_padding(option, (len(self.indicator)+1) * ' ')
+
             if self.multiselect and index in self.all_selected:
                 format = curses.color_pair(1)
                 line = ('{0} {1}'.format(prefix, option), format)
@@ -111,6 +113,15 @@ class Picker(object):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
+    def add_multiline_padding(self, option, pad):
+        lines_transformed = []
+        for i, line in enumerate(option.splitlines()):
+            if i > 0:
+                lines_transformed.append('{0} {1}'.format(pad, line))
+            else:
+                lines_transformed.append(line)
+        return '\n'.join(lines_transformed)
+
     def draw(self):
         """draw the curses ui on the screen, handle scroll if needed"""
         self.screen.clear()
@@ -118,7 +129,6 @@ class Picker(object):
         x, y = 1, 1  # start point
         max_y, max_x = self.screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
-
         lines, current_line = self.get_lines()
 
         # calculate how many lines we should scroll, relative to the top
@@ -130,13 +140,13 @@ class Picker(object):
         self.scroll_top = scroll_top
 
         lines_to_draw = lines[scroll_top:scroll_top+max_rows]
-
         for line in lines_to_draw:
             if type(line) is tuple:
                 self.screen.addnstr(y, x, line[0], max_x-2, line[1])
+                y += len(line[0].splitlines())
             else:
                 self.screen.addnstr(y, x, line, max_x-2)
-            y += 1
+                y += len(line.splitlines())
 
         self.screen.refresh()
 
