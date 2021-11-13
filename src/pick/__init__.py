@@ -34,7 +34,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], str]] = None
+    options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], Optional[str]]] = None
     all_selected: List[int] = field(init=False, default_factory=list)
     custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
