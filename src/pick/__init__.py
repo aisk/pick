@@ -1,4 +1,6 @@
 import curses
+from dataclasses import dataclass, field
+from typing import Callable, List, Optional, Dict
 
 __all__ = ['Picker', 'pick']
 
@@ -9,6 +11,7 @@ KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
 
+@dataclass
 class Picker:
     """The :class:`Picker <Picker>` object
 
@@ -20,30 +23,33 @@ class Picker:
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, options_map_func=None):
+    options: List[str]
+    title: Optional[str] = None
+    indicator: str = "*"
+    default_index: int = 0
+    multiselect: bool = False
+    min_selection_count: int = 0
+    options_map_func: Optional[Callable[[str], str]] = None
+    all_selected: List[str] = field(init=False, default_factory=list)
+    custom_handlers: Dict[str, Callable[["Picker"], str]] = field(
+        init=False, default_factory=dict
+    )
+    index: int = field(init=False, default=0)
 
-        if len(options) == 0:
+    def __post_init__(self):
+        if len(self.options) == 0:
             raise ValueError('options should not be an empty list')
 
-        self.options = options
-        self.title = title
-        self.indicator = indicator
-        self.multiselect = multiselect or multi_select
-        self.min_selection_count = min_selection_count
-        self.options_map_func = options_map_func
-        self.all_selected = []
-
-        if default_index >= len(options):
+        if self.default_index >= len(self.options):
             raise ValueError('default_index should be less than the length of options')
 
-        if multiselect and min_selection_count > len(options):
+        if self.multiselect and self.min_selection_count > len(self.options):
             raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
 
-        if options_map_func is not None and not callable(options_map_func):
+        if self.options_map_func is not None and not callable(self.options_map_func):
             raise ValueError('options_map_func must be a callable function')
 
-        self.index = default_index
-        self.custom_handlers = {}
+        self.index = self.default_index
 
     def register_custom_handler(self, key, func):
         self.custom_handlers[key] = func
