@@ -35,6 +35,7 @@ class Picker:
         init=False, default_factory=dict
     )
     index: int = field(init=False, default=0)
+    scroll_top: int = field(init=False, default=0)
 
     def __post_init__(self):
         if len(self.options) == 0:
@@ -127,14 +128,12 @@ class Picker:
         lines, current_line = self.get_lines()
 
         # calculate how many lines we should scroll, relative to the top
-        scroll_top = getattr(self, 'scroll_top', 0)
-        if current_line <= scroll_top:
-            scroll_top = 0
-        elif current_line - scroll_top > max_rows:
-            scroll_top = current_line - max_rows
-        self.scroll_top = scroll_top
+        if current_line <= self.scroll_top:
+            self.scroll_top = 0
+        elif current_line - self.scroll_top > max_rows:
+            self.scroll_top = current_line - max_rows
 
-        lines_to_draw = lines[scroll_top:scroll_top+max_rows]
+        lines_to_draw = lines[self.scroll_top:self.scroll_top+max_rows]
 
         for line in lines_to_draw:
             if type(line) is tuple:
