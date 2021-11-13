@@ -1,5 +1,3 @@
-#-*-coding:utf-8-*-
-
 import curses
 
 __all__ = ['Picker', 'pick']
@@ -10,7 +8,8 @@ KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
-class Picker(object):
+
+class Picker:
     """The :class:`Picker <Picker>` object
 
     :param options: a list of options to choose from
