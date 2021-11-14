@@ -225,7 +225,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], str]] = None,
+    options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], Optional[str]]] = None,
 ) -> Union[
     List[SELECTION_T],
     List[Tuple[OPTIONS_MAP_VALUE_T, int]],
