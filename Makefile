@@ -1,5 +1,12 @@
+.PHONY=publish
 publish:
-	python setup.py sdist
-	python setup.py bdist_wheel
-	twine upload dist/*
+	poetry build
+	poetry publish
+
+.PHONY=test
+test:
+	poetry run pytest
+
+.PHONY=clean
+clean:
 	rm -fr build dist pick.egg-info
