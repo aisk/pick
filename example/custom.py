@@ -1,7 +1,3 @@
-#-*-coding:utf-8-*-
-
-from __future__ import print_function
-
 import curses
 from pick import Picker
 

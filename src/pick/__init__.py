@@ -1,6 +1,6 @@
-#-*-coding:utf-8-*-
-
 import curses
+from dataclasses import dataclass, field
+from typing import Callable, List, Optional, Dict
 
 __all__ = ['Picker', 'pick']
 
@@ -10,7 +10,9 @@ KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
-class Picker(object):
+
+@dataclass
+class Picker:
     """The :class:`Picker <Picker>` object
 
     :param options: a list of options to choose from
@@ -21,30 +23,34 @@ class Picker(object):
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    def __init__(self, options, title=None, indicator='*', default_index=0, multiselect=False, multi_select=False, min_selection_count=0, options_map_func=None):
+    options: List[str]
+    title: Optional[str] = None
+    indicator: str = "*"
+    default_index: int = 0
+    multiselect: bool = False
+    min_selection_count: int = 0
+    options_map_func: Optional[Callable[[str], str]] = None
+    all_selected: List[str] = field(init=False, default_factory=list)
+    custom_handlers: Dict[str, Callable[["Picker"], str]] = field(
+        init=False, default_factory=dict
+    )
+    index: int = field(init=False, default=0)
+    scroll_top: int = field(init=False, default=0)
 
-        if len(options) == 0:
+    def __post_init__(self):
+        if len(self.options) == 0:
             raise ValueError('options should not be an empty list')
 
-        self.options = options
-        self.title = title
-        self.indicator = indicator
-        self.multiselect = multiselect or multi_select
-        self.min_selection_count = min_selection_count
-        self.options_map_func = options_map_func
-        self.all_selected = []
-
-        if default_index >= len(options):
+        if self.default_index >= len(self.options):
             raise ValueError('default_index should be less than the length of options')
 
-        if multiselect and min_selection_count > len(options):
+        if self.multiselect and self.min_selection_count > len(self.options):
             raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
 
-        if options_map_func is not None and not callable(options_map_func):
+        if self.options_map_func is not None and not callable(self.options_map_func):
             raise ValueError('options_map_func must be a callable function')
 
-        self.index = default_index
-        self.custom_handlers = {}
+        self.index = self.default_index
 
     def register_custom_handler(self, key, func):
         self.custom_handlers[key] = func
@@ -111,39 +117,37 @@ class Picker(object):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self):
+    def draw(self, screen):
         """draw the curses ui on the screen, handle scroll if needed"""
-        self.screen.clear()
+        screen.clear()
 
         x, y = 1, 1  # start point
-        max_y, max_x = self.screen.getmaxyx()
+        max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
 
         lines, current_line = self.get_lines()
 
         # calculate how many lines we should scroll, relative to the top
-        scroll_top = getattr(self, 'scroll_top', 0)
-        if current_line <= scroll_top:
-            scroll_top = 0
-        elif current_line - scroll_top > max_rows:
-            scroll_top = current_line - max_rows
-        self.scroll_top = scroll_top
+        if current_line <= self.scroll_top:
+            self.scroll_top = 0
+        elif current_line - self.scroll_top > max_rows:
+            self.scroll_top = current_line - max_rows
 
-        lines_to_draw = lines[scroll_top:scroll_top+max_rows]
+        lines_to_draw = lines[self.scroll_top:self.scroll_top+max_rows]
 
         for line in lines_to_draw:
             if type(line) is tuple:
-                self.screen.addnstr(y, x, line[0], max_x-2, line[1])
+                screen.addnstr(y, x, line[0], max_x-2, line[1])
             else:
-                self.screen.addnstr(y, x, line, max_x-2)
+                screen.addnstr(y, x, line, max_x-2)
             y += 1
 
-        self.screen.refresh()
+        screen.refresh()
 
-    def run_loop(self):
+    def run_loop(self, screen):
         while True:
             self.draw()
-            c = self.screen.getch()
+            c = screen.getch()
             if c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
@@ -173,9 +177,8 @@ class Picker(object):
             curses.initscr()
 
     def _start(self, screen):
-        self.screen = screen
         self.config_curses()
-        return self.run_loop()
+        return self.run_loop(screen)
 
     def start(self):
         return curses.wrapper(self._start)
