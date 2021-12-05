@@ -1,9 +1,8 @@
 pick
 ====
 
-.. image:: https://travis-ci.org/wong2/pick.svg?branch=master
-   :alt: Build Status
-   :target: https://travis-ci.org/wong2/pick
+.. image:: https://circleci.com/gh/wong2/pick/tree/master.svg?style=svg
+   :target: https://circleci.com/gh/wong2/pick/tree/master
 
 .. image:: https://img.shields.io/pypi/v/pick.svg
    :alt: PyPI
