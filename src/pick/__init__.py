@@ -146,7 +146,7 @@ class Picker:
 
     def run_loop(self, screen):
         while True:
-            self.draw()
+            self.draw(screen)
             c = screen.getch()
             if c in KEYS_UP:
                 self.move_up()
