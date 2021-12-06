@@ -11,7 +11,7 @@ keywords = ["terminal", "gui"]
 
 [tool.poetry.dependencies]
 python = ">=3.6"
-windows-curses = {version = "^2.2.0", platform = "win32"}
+windows-curses = {version = "2.2.0", platform = "win32"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
