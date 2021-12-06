@@ -1,8 +1,8 @@
 pick
 ====
 
-.. image:: https://circleci.com/gh/wong2/pick/tree/master.svg?style=svg
-   :target: https://circleci.com/gh/wong2/pick/tree/master
+.. image:: https://github.com/wong2/pick/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/wong2/pick/actions/workflows/ci.yml
 
 .. image:: https://img.shields.io/pypi/v/pick.svg
    :alt: PyPI
