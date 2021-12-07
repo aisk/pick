@@ -7,6 +7,10 @@ pick
 .. image:: https://img.shields.io/pypi/v/pick.svg
    :alt: PyPI
    :target: https://pypi.python.org/pypi/pick
+   
+.. image:: https://img.shields.io/pypi/dm/pick
+   :alt: PyPI
+   :target: https://pypi.python.org/pypi/pick
 
 **pick** is a small python library to help you create curses based interactive selection list in the terminal. See it in action:
 
