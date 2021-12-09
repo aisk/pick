@@ -28,13 +28,13 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    options: Union[List[str], List[OPTIONS_MAP_VALUE_T]]
+    options: List[OPTIONS_MAP_VALUE_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], Optional[str]]] = None
+    options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str
     all_selected: List[int] = field(init=False, default_factory=list)
     custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
@@ -52,7 +52,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         if self.multiselect and self.min_selection_count > len(self.options):
             raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
 
-        if self.options_map_func is not None and not callable(self.options_map_func):
+        if not callable(self.options_map_func):
             raise ValueError('options_map_func must be a callable function')
 
         self.index = self.default_index
@@ -81,12 +81,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             else:
                 self.all_selected.append(self.index)
 
-    def get_selected(
-        self
-    ) -> Union[
-        List[Tuple[str, int]],
-        List[Tuple[OPTIONS_MAP_VALUE_T, int]]
-    ]:
+    def get_selected(self) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
         """return the current selected option as a tuple: (option, index)
            or as a list of tuples (in case multiselect==True)
         """
@@ -94,10 +89,10 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             return_tuples = []
             for selected in self.all_selected:
                 return_tuples.append((self.options[selected], selected))
-            return return_tuples  # type: ignore[return-value]
+            return return_tuples
         else:
             selection = self.options[self.index], self.index
-            return [selection]  # type: ignore[return-value]
+            return [selection]
 
     def get_title_lines(self) -> List[str]:
         if self.title:
@@ -107,9 +102,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     def get_option_lines(self) -> Union[List[str], List[Tuple[str, int]]]:
         lines: Union[List[str], List[Tuple[str, int]]] = []  # type: ignore[assignment]
         for index, option in enumerate(self.options):
-            # pass the option through the options map of one was passed in
-            if self.options_map_func:
-                option = self.options_map_func(option)  # type: ignore[arg-type]
+            option_as_str = self.options_map_func(option)
 
             if index == self.index:
                 prefix = self.indicator
@@ -119,9 +112,9 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             line: Union[Tuple[str, int], str]
             if self.multiselect and index in self.all_selected:
                 format = curses.color_pair(1)
-                line = ('{0} {1}'.format(prefix, option), format)
+                line = ('{0} {1}'.format(prefix, option_as_str), format)
             else:
-                line = '{0} {1}'.format(prefix, option)
+                line = '{0} {1}'.format(prefix, option_as_str)
             lines.append(line)  # type: ignore[arg-type]
 
         return lines
@@ -162,11 +155,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def run_loop(
             self, screen
-    ) -> Union[
-        List[SELECTION_T],
-        List[Tuple[OPTIONS_MAP_VALUE_T, int]],
-        CUSTOM_HANDLER_RETURN_T
-    ]:
+    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -200,37 +189,25 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def _start(
         self, screen
-    ) -> Union[
-        List[SELECTION_T],
-        List[Tuple[OPTIONS_MAP_VALUE_T, int]],
-        CUSTOM_HANDLER_RETURN_T,
-    ]:
+    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         self.config_curses()
         return self.run_loop(screen)
 
     def start(
         self
-    ) -> Union[
-        List[SELECTION_T],
-        List[Tuple[OPTIONS_MAP_VALUE_T, int]],
-        CUSTOM_HANDLER_RETURN_T,
-    ]:
+    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         return curses.wrapper(self._start)
 
 
 def pick(
-    options: Union[List[str], List[OPTIONS_MAP_VALUE_T]],
+    options: List[OPTIONS_MAP_VALUE_T],
     title: Optional[str] = None,
     indicator: str = "*",
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], Optional[str]]] = None,
-) -> Union[
-    List[SELECTION_T],
-    List[Tuple[OPTIONS_MAP_VALUE_T, int]],
-    CUSTOM_HANDLER_RETURN_T,
-]:
+    options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
+) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -240,7 +217,7 @@ def pick(
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker: Picker[List[SELECTION_T], OPTIONS_MAP_VALUE_T] = Picker(
+    picker: Picker[List[Tuple[OPTIONS_MAP_VALUE_T, int]], OPTIONS_MAP_VALUE_T] = Picker(
         options,
         title,
         indicator,
