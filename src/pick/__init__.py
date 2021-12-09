@@ -84,8 +84,6 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     def get_selected(
         self
     ) -> Union[
-        Tuple[str, int],
-        Tuple[OPTIONS_MAP_VALUE_T, int],
         List[Tuple[str, int]],
         List[Tuple[OPTIONS_MAP_VALUE_T, int]]
     ]:
@@ -98,7 +96,8 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
                 return_tuples.append((self.options[selected], selected))
             return return_tuples  # type: ignore[return-value]
         else:
-            return self.options[self.index], self.index  # type: ignore[return-value]
+            selection = self.options[self.index], self.index
+            return [selection]  # type: ignore[return-value]
 
     def get_title_lines(self) -> List[str]:
         if self.title:
@@ -164,8 +163,6 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     def run_loop(
             self, screen
     ) -> Union[
-        SELECTION_T,
-        Tuple[OPTIONS_MAP_VALUE_T, int],
         List[SELECTION_T],
         List[Tuple[OPTIONS_MAP_VALUE_T, int]],
         CUSTOM_HANDLER_RETURN_T
@@ -204,8 +201,6 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     def _start(
         self, screen
     ) -> Union[
-        SELECTION_T,
-        Tuple[OPTIONS_MAP_VALUE_T, int],
         List[SELECTION_T],
         List[Tuple[OPTIONS_MAP_VALUE_T, int]],
         CUSTOM_HANDLER_RETURN_T,
@@ -216,8 +211,6 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     def start(
         self
     ) -> Union[
-        SELECTION_T,
-        Tuple[OPTIONS_MAP_VALUE_T, int],
         List[SELECTION_T],
         List[Tuple[OPTIONS_MAP_VALUE_T, int]],
         CUSTOM_HANDLER_RETURN_T,
@@ -234,8 +227,6 @@ def pick(
     min_selection_count: int = 0,
     options_map_func: Optional[Callable[[OPTIONS_MAP_VALUE_T], str]] = None,
 ) -> Union[
-    SELECTION_T,
-    Tuple[OPTIONS_MAP_VALUE_T, int],
     List[SELECTION_T],
     List[Tuple[OPTIONS_MAP_VALUE_T, int]],
     CUSTOM_HANDLER_RETURN_T,
