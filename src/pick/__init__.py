@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional, Dict
+from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar
 
 __all__ = ['Picker', 'pick']
 
@@ -10,9 +10,13 @@ KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
+CUSTOM_HANDLER_RETURN_T = TypeVar("CUSTOM_HANDLER_RETURN_T")
+KEY_T = int
+SELECTION_T = Tuple[str, int]
+
 
 @dataclass
-class Picker:
+class Picker(Generic[CUSTOM_HANDLER_RETURN_T]):
     """The :class:`Picker <Picker>` object
 
     :param options: a list of options to choose from
@@ -30,14 +34,14 @@ class Picker:
     multiselect: bool = False
     min_selection_count: int = 0
     options_map_func: Optional[Callable[[str], str]] = None
-    all_selected: List[str] = field(init=False, default_factory=list)
-    custom_handlers: Dict[str, Callable[["Picker"], str]] = field(
+    all_selected: List[int] = field(init=False, default_factory=list)
+    custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
     )
     index: int = field(init=False, default=0)
     scroll_top: int = field(init=False, default=0)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if len(self.options) == 0:
             raise ValueError('options should not be an empty list')
 
@@ -52,27 +56,31 @@ class Picker:
 
         self.index = self.default_index
 
-    def register_custom_handler(self, key, func):
+    def register_custom_handler(
+        self,
+        key: KEY_T,
+        func: Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]
+    ) -> None:
         self.custom_handlers[key] = func
 
-    def move_up(self):
+    def move_up(self) -> None:
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
 
-    def move_down(self):
+    def move_down(self) -> None:
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
 
-    def mark_index(self):
+    def mark_index(self) -> None:
         if self.multiselect:
             if self.index in self.all_selected:
                 self.all_selected.remove(self.index)
             else:
                 self.all_selected.append(self.index)
 
-    def get_selected(self):
+    def get_selected(self) -> Union[SELECTION_T, List[SELECTION_T]]:
         """return the current selected option as a tuple: (option, index)
            or as a list of tuples (in case multiselect==True)
         """
@@ -84,12 +92,12 @@ class Picker:
         else:
             return self.options[self.index], self.index
 
-    def get_title_lines(self):
+    def get_title_lines(self) -> List[str]:
         if self.title:
             return self.title.split('\n') + ['']
         return []
 
-    def get_option_lines(self):
+    def get_option_lines(self) -> List:
         lines = []
         for index, option in enumerate(self.options):
             # pass the option through the options map of one was passed in
@@ -101,6 +109,7 @@ class Picker:
             else:
                 prefix = len(self.indicator) * ' '
 
+            line: Union[Tuple[str, int], str]
             if self.multiselect and index in self.all_selected:
                 format = curses.color_pair(1)
                 line = ('{0} {1}'.format(prefix, option), format)
@@ -110,14 +119,14 @@ class Picker:
 
         return lines
 
-    def get_lines(self):
+    def get_lines(self) -> Tuple[List, int]:
         title_lines = self.get_title_lines()
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self, screen):
+    def draw(self, screen) -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
         screen.clear()
 
@@ -144,7 +153,9 @@ class Picker:
 
         screen.refresh()
 
-    def run_loop(self, screen):
+    def run_loop(
+            self, screen
+    ) -> Union[SELECTION_T, List[SELECTION_T], CUSTOM_HANDLER_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -163,7 +174,7 @@ class Picker:
                 if ret:
                     return ret
 
-    def config_curses(self):
+    def config_curses(self) -> None:
         try:
             # use the default colors of the terminal
             curses.use_default_colors()
@@ -176,11 +187,13 @@ class Picker:
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
-    def _start(self, screen):
+    def _start(
+        self, screen
+    ) -> Union[SELECTION_T, List[SELECTION_T], CUSTOM_HANDLER_RETURN_T]:
         self.config_curses()
         return self.run_loop(screen)
 
-    def start(self):
+    def start(self) -> Union[SELECTION_T, List[SELECTION_T], CUSTOM_HANDLER_RETURN_T]:
         return curses.wrapper(self._start)
 
 
