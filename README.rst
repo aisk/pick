@@ -14,7 +14,7 @@ pick
    
 |
 
-**pick** is a small python library to help you create curses based interactive selection list in the terminal. 
+**pick** is a small python library to help you create cursor-based interactive selection list in the terminal. 
 
 .. image:: https://github.com/wong2/pick/raw/master/example/basic.gif
    :alt: Demo
