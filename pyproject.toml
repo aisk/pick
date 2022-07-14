@@ -16,7 +16,7 @@ dataclasses = { version = "^0.8", python = "~3.6" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
-mypy = "^0.910"
+mypy = "^0.961"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
