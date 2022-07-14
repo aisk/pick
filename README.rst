@@ -120,4 +120,4 @@ If your options are not in a format that you want displayed (such as a dictionar
 Community Projects
 --------------------
 
-`pickpack <https://github.com/anafvana/pickpack>`_ A fork of `pick` to select tree data.
+`pickpack <https://github.com/anafvana/pickpack>`_: A fork of `pick` to select tree data.
