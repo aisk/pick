@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional, Dict
+from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar
 
 __all__ = ['Picker', 'pick']
 
@@ -10,9 +10,14 @@ KEYS_UP = (curses.KEY_UP, ord('k'))
 KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
 
+CUSTOM_HANDLER_RETURN_T = TypeVar("CUSTOM_HANDLER_RETURN_T")
+KEY_T = int
+OPTIONS_MAP_VALUE_T = TypeVar("OPTIONS_MAP_VALUE_T")
+SELECTION_T = Tuple[str, int]
+
 
 @dataclass
-class Picker:
+class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     """The :class:`Picker <Picker>` object
 
     :param options: a list of options to choose from
@@ -23,21 +28,21 @@ class Picker:
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    options: List[str]
+    options: List[OPTIONS_MAP_VALUE_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    options_map_func: Optional[Callable[[str], str]] = None
-    all_selected: List[str] = field(init=False, default_factory=list)
-    custom_handlers: Dict[str, Callable[["Picker"], str]] = field(
+    options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str
+    all_selected: List[int] = field(init=False, default_factory=list)
+    custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
     )
     index: int = field(init=False, default=0)
     scroll_top: int = field(init=False, default=0)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if len(self.options) == 0:
             raise ValueError('options should not be an empty list')
 
@@ -47,32 +52,36 @@ class Picker:
         if self.multiselect and self.min_selection_count > len(self.options):
             raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
 
-        if self.options_map_func is not None and not callable(self.options_map_func):
+        if not callable(self.options_map_func):
             raise ValueError('options_map_func must be a callable function')
 
         self.index = self.default_index
 
-    def register_custom_handler(self, key, func):
+    def register_custom_handler(
+        self,
+        key: KEY_T,
+        func: Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]
+    ) -> None:
         self.custom_handlers[key] = func
 
-    def move_up(self):
+    def move_up(self) -> None:
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
 
-    def move_down(self):
+    def move_down(self) -> None:
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
 
-    def mark_index(self):
+    def mark_index(self) -> None:
         if self.multiselect:
             if self.index in self.all_selected:
                 self.all_selected.remove(self.index)
             else:
                 self.all_selected.append(self.index)
 
-    def get_selected(self):
+    def get_selected(self) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
         """return the current selected option as a tuple: (option, index)
            or as a list of tuples (in case multiselect==True)
         """
@@ -82,42 +91,42 @@ class Picker:
                 return_tuples.append((self.options[selected], selected))
             return return_tuples
         else:
-            return self.options[self.index], self.index
+            selection = self.options[self.index], self.index
+            return [selection]
 
-    def get_title_lines(self):
+    def get_title_lines(self) -> List[str]:
         if self.title:
             return self.title.split('\n') + ['']
         return []
 
-    def get_option_lines(self):
-        lines = []
+    def get_option_lines(self) -> Union[List[str], List[Tuple[str, int]]]:
+        lines: Union[List[str], List[Tuple[str, int]]] = []  # type: ignore[assignment]
         for index, option in enumerate(self.options):
-            # pass the option through the options map of one was passed in
-            if self.options_map_func:
-                option = self.options_map_func(option)
+            option_as_str = self.options_map_func(option)
 
             if index == self.index:
                 prefix = self.indicator
             else:
                 prefix = len(self.indicator) * ' '
 
+            line: Union[Tuple[str, int], str]
             if self.multiselect and index in self.all_selected:
                 format = curses.color_pair(1)
-                line = ('{0} {1}'.format(prefix, option), format)
+                line = ('{0} {1}'.format(prefix, option_as_str), format)
             else:
-                line = '{0} {1}'.format(prefix, option)
-            lines.append(line)
+                line = '{0} {1}'.format(prefix, option_as_str)
+            lines.append(line)  # type: ignore[arg-type]
 
         return lines
 
-    def get_lines(self):
+    def get_lines(self) -> Tuple[List, int]:
         title_lines = self.get_title_lines()
         option_lines = self.get_option_lines()
-        lines = title_lines + option_lines
+        lines = title_lines + option_lines  # type: ignore[operator]
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self, screen):
+    def draw(self, screen) -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
         screen.clear()
 
@@ -144,7 +153,9 @@ class Picker:
 
         screen.refresh()
 
-    def run_loop(self, screen):
+    def run_loop(
+            self, screen
+    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -163,7 +174,7 @@ class Picker:
                 if ret:
                     return ret
 
-    def config_curses(self):
+    def config_curses(self) -> None:
         try:
             # use the default colors of the terminal
             curses.use_default_colors()
@@ -176,15 +187,27 @@ class Picker:
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
-    def _start(self, screen):
+    def _start(
+        self, screen
+    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         self.config_curses()
         return self.run_loop(screen)
 
-    def start(self):
+    def start(
+        self
+    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         return curses.wrapper(self._start)
 
 
-def pick(*args, **kwargs):
+def pick(
+    options: List[OPTIONS_MAP_VALUE_T],
+    title: Optional[str] = None,
+    indicator: str = "*",
+    default_index: int = 0,
+    multiselect: bool = False,
+    min_selection_count: int = 0,
+    options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
+) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -194,5 +217,13 @@ def pick(*args, **kwargs):
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(*args, **kwargs)
+    picker: Picker[List[Tuple[OPTIONS_MAP_VALUE_T, int]], OPTIONS_MAP_VALUE_T] = Picker(
+        options,
+        title,
+        indicator,
+        default_index,
+        multiselect,
+        min_selection_count,
+        options_map_func,
+    )
     return picker.start()
