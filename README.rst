@@ -116,3 +116,8 @@ If your options are not in a format that you want displayed (such as a dictionar
 **outputs**::
 
     >>> ({ 'label': 'option1' }, 0)
+
+Community Projects
+--------------------
+
+`pickpack <https://github.com/anafvana/pickpack>`_ A fork of `pick` to select tree data.
