@@ -10,9 +10,8 @@ homepage = "https://github.com/wong2/pick"
 keywords = ["terminal", "gui"]
 
 [tool.poetry.dependencies]
-python = ">=3.6.2"
+python = ">=3.7"
 windows-curses = {version = "^2.2.0", platform = "win32"}
-dataclasses = { version = "^0.8", python = "~3.6" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
