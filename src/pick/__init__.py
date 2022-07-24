@@ -13,7 +13,7 @@ KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
 CUSTOM_HANDLER_RETURN_T = TypeVar("CUSTOM_HANDLER_RETURN_T")
 KEY_T = int
 OPTIONS_MAP_VALUE_T = TypeVar("OPTIONS_MAP_VALUE_T")
-SELECTION_T = Tuple[str, int]
+PICK_RETURN_T = Tuple[OPTIONS_MAP_VALUE_T, int]
 
 
 @dataclass
@@ -81,7 +81,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             else:
                 self.all_selected.append(self.index)
 
-    def get_selected(self) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
+    def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         """return the current selected option as a tuple: (option, index)
         or as a list of tuples (in case multiselect==True)
         """
@@ -91,8 +91,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
                 return_tuples.append((self.options[selected], selected))
             return return_tuples
         else:
-            selection = self.options[self.index], self.index
-            return [selection]
+            return self.options[self.index], self.index
 
     def get_title_lines(self) -> List[str]:
         if self.title:
@@ -155,7 +154,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def run_loop(
         self, screen
-    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
+    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T, CUSTOM_HANDLER_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -192,13 +191,13 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def _start(
         self, screen
-    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
+    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T, CUSTOM_HANDLER_RETURN_T]:
         self.config_curses()
         return self.run_loop(screen)
 
     def start(
         self,
-    ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
+    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T, CUSTOM_HANDLER_RETURN_T]:
         return curses.wrapper(self._start)
 
 
@@ -210,7 +209,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
-) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
+) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
     """Construct and start a :class:`Picker <Picker>`.
 
     Usage::
@@ -220,7 +219,7 @@ def pick(
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker: Picker[List[Tuple[OPTIONS_MAP_VALUE_T, int]], OPTIONS_MAP_VALUE_T] = Picker(
+    picker = Picker(
         options,
         title,
         indicator,

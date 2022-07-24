@@ -8,17 +8,17 @@ def test_move_up_down():
     options = ["option1", "option2", "option3"]
     picker: Picker[str, str] = Picker(options, title)
     picker.move_up()
-    assert picker.get_selected() == [("option3", 2)]
+    assert picker.get_selected() == ("option3", 2)
     picker.move_down()
     picker.move_down()
-    assert picker.get_selected() == [("option2", 1)]
+    assert picker.get_selected() == ("option2", 1)
 
 
 def test_default_index():
     title = "Please choose an option: "
     options = ["option1", "option2", "option3"]
     picker: Picker[str, str] = Picker(options, title, default_index=1)
-    assert picker.get_selected() == [("option2", 1)]
+    assert picker.get_selected() == ("option2", 1)
 
 
 def test_get_lines():
@@ -63,4 +63,4 @@ def test_options_map_func():
     )
     lines, current_line = picker.get_lines()
     assert lines == [title, "", "* option1", "  option2", "  option3"]
-    assert picker.get_selected() == [({"label": "option1"}, 0)]
+    assert picker.get_selected() == ({"label": "option1"}, 0)
