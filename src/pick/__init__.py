@@ -35,7 +35,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     multiselect: bool = False
     min_selection_count: int = 0
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str
-    all_selected: List[int] = field(init=False, default_factory=list)
+    selected_indexes: List[int] = field(init=False, default_factory=list)
     custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
     )
@@ -76,10 +76,10 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def mark_index(self) -> None:
         if self.multiselect:
-            if self.index in self.all_selected:
-                self.all_selected.remove(self.index)
+            if self.index in self.selected_indexes:
+                self.selected_indexes.remove(self.index)
             else:
-                self.all_selected.append(self.index)
+                self.selected_indexes.append(self.index)
 
     def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         """return the current selected option as a tuple: (option, index)
@@ -87,7 +87,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         """
         if self.multiselect:
             return_tuples = []
-            for selected in self.all_selected:
+            for selected in self.selected_indexes:
                 return_tuples.append((self.options[selected], selected))
             return return_tuples
         else:
@@ -109,7 +109,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
                 prefix = len(self.indicator) * " "
 
             line: Union[Tuple[str, int], str]
-            if self.multiselect and index in self.all_selected:
+            if self.multiselect and index in self.selected_indexes:
                 format = curses.color_pair(1)
                 line = ("{0} {1}".format(prefix, option_as_str), format)
             else:
@@ -165,7 +165,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             elif c in KEYS_ENTER:
                 if (
                     self.multiselect
-                    and len(self.all_selected) < self.min_selection_count
+                    and len(self.selected_indexes) < self.min_selection_count
                 ):
                     continue
                 return self.get_selected()
