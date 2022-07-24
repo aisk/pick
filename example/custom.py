@@ -15,8 +15,9 @@ def print_selection(selection):
 def go_back(picker):
     return (None, -1)
 
-title = 'Please choose your favorite programming language: '
-options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']
+
+title = "Please choose your favorite programming language: "
+options = ["Java", "JavaScript", "Python", "PHP", "C++", "Erlang", "Haskell"]
 
 # with type annotation
 picker: Picker[Tuple[None, int], str] = Picker(options, title)

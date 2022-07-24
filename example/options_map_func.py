@@ -1,19 +1,22 @@
 from pick import pick
 
-title = 'Please choose your favorite fruit: '
+title = "Please choose your favorite fruit: "
 options = [
-    { 'name': 'Apples', 'grow_on': 'trees' },
-    { 'name': 'Oranges', 'grow_on': 'trees' },
-    { 'name': 'Strawberries', 'grow_on': 'vines' },
-    { 'name': 'Grapes', 'grow_on': 'vines' },
+    {"name": "Apples", "grow_on": "trees"},
+    {"name": "Oranges", "grow_on": "trees"},
+    {"name": "Strawberries", "grow_on": "vines"},
+    {"name": "Grapes", "grow_on": "vines"},
 ]
+
 
 def get_description_for_display(option):
     # format the option data for display
-    return '{0} (grow on {1})'.format(option.get('name'), option.get('grow_on'))
+    return "{0} (grow on {1})".format(option.get("name"), option.get("grow_on"))
 
 
-selection = pick(options, title, indicator='=>', options_map_func=get_description_for_display)
+selection = pick(
+    options, title, indicator="=>", options_map_func=get_description_for_display
+)
 assert len(selection) == 1
 option, index = selection[0]
 print(option, index)

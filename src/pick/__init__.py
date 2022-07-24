@@ -2,13 +2,13 @@ import curses
 from dataclasses import dataclass, field
 from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar
 
-__all__ = ['Picker', 'pick']
+__all__ = ["Picker", "pick"]
 
 
-KEYS_ENTER = (curses.KEY_ENTER, ord('\n'), ord('\r'))
-KEYS_UP = (curses.KEY_UP, ord('k'))
-KEYS_DOWN = (curses.KEY_DOWN, ord('j'))
-KEYS_SELECT = (curses.KEY_RIGHT, ord(' '))
+KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
+KEYS_UP = (curses.KEY_UP, ord("k"))
+KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
+KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
 
 CUSTOM_HANDLER_RETURN_T = TypeVar("CUSTOM_HANDLER_RETURN_T")
 KEY_T = int
@@ -44,23 +44,23 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
-            raise ValueError('options should not be an empty list')
+            raise ValueError("options should not be an empty list")
 
         if self.default_index >= len(self.options):
-            raise ValueError('default_index should be less than the length of options')
+            raise ValueError("default_index should be less than the length of options")
 
         if self.multiselect and self.min_selection_count > len(self.options):
-            raise ValueError('min_selection_count is bigger than the available options, you will not be able to make any selection')
+            raise ValueError(
+                "min_selection_count is bigger than the available options, you will not be able to make any selection"
+            )
 
         if not callable(self.options_map_func):
-            raise ValueError('options_map_func must be a callable function')
+            raise ValueError("options_map_func must be a callable function")
 
         self.index = self.default_index
 
     def register_custom_handler(
-        self,
-        key: KEY_T,
-        func: Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]
+        self, key: KEY_T, func: Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]
     ) -> None:
         self.custom_handlers[key] = func
 
@@ -83,7 +83,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def get_selected(self) -> List[Tuple[OPTIONS_MAP_VALUE_T, int]]:
         """return the current selected option as a tuple: (option, index)
-           or as a list of tuples (in case multiselect==True)
+        or as a list of tuples (in case multiselect==True)
         """
         if self.multiselect:
             return_tuples = []
@@ -96,7 +96,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def get_title_lines(self) -> List[str]:
         if self.title:
-            return self.title.split('\n') + ['']
+            return self.title.split("\n") + [""]
         return []
 
     def get_option_lines(self) -> Union[List[str], List[Tuple[str, int]]]:
@@ -107,14 +107,14 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             if index == self.index:
                 prefix = self.indicator
             else:
-                prefix = len(self.indicator) * ' '
+                prefix = len(self.indicator) * " "
 
             line: Union[Tuple[str, int], str]
             if self.multiselect and index in self.all_selected:
                 format = curses.color_pair(1)
-                line = ('{0} {1}'.format(prefix, option_as_str), format)
+                line = ("{0} {1}".format(prefix, option_as_str), format)
             else:
-                line = '{0} {1}'.format(prefix, option_as_str)
+                line = "{0} {1}".format(prefix, option_as_str)
             lines.append(line)  # type: ignore[arg-type]
 
         return lines
@@ -142,19 +142,19 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         elif current_line - self.scroll_top > max_rows:
             self.scroll_top = current_line - max_rows
 
-        lines_to_draw = lines[self.scroll_top:self.scroll_top+max_rows]
+        lines_to_draw = lines[self.scroll_top : self.scroll_top + max_rows]
 
         for line in lines_to_draw:
             if type(line) is tuple:
-                screen.addnstr(y, x, line[0], max_x-2, line[1])
+                screen.addnstr(y, x, line[0], max_x - 2, line[1])
             else:
-                screen.addnstr(y, x, line, max_x-2)
+                screen.addnstr(y, x, line, max_x - 2)
             y += 1
 
         screen.refresh()
 
     def run_loop(
-            self, screen
+        self, screen
     ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         while True:
             self.draw(screen)
@@ -164,7 +164,10 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             elif c in KEYS_DOWN:
                 self.move_down()
             elif c in KEYS_ENTER:
-                if self.multiselect and len(self.all_selected) < self.min_selection_count:
+                if (
+                    self.multiselect
+                    and len(self.all_selected) < self.min_selection_count
+                ):
                     continue
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multiselect:
@@ -194,7 +197,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         return self.run_loop(screen)
 
     def start(
-        self
+        self,
     ) -> Union[List[Tuple[OPTIONS_MAP_VALUE_T, int]], CUSTOM_HANDLER_RETURN_T]:
         return curses.wrapper(self._start)
 
