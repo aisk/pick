@@ -26,6 +26,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     :param indicator: (optional) custom the selection indicator
     :param default_index: (optional) set this if the default selected option is not the first one
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
+    :param disabled_options: (optional) allows you to disable certain options via list index
     """
 
     options: List[OPTIONS_MAP_VALUE_T]
@@ -35,6 +36,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     multiselect: bool = False
     min_selection_count: int = 0
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str
+    disabled_options: tuple = ()
     selected_indexes: List[int] = field(init=False, default_factory=list)
     custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
@@ -57,7 +59,19 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         if not callable(self.options_map_func):
             raise ValueError("options_map_func must be a callable function")
 
+        if len(self.disabled_options) >= len(self.options):
+            raise ValueError("disabled_options should be less than the length of options")
+
+        for i in self.disabled_options:
+            if i + 1 > len(self.options):
+                raise ValueError("indexes in disabled_options should point to an index in options")
+
         self.index = self.default_index
+        while self.index in self.disabled_options:  # this is in case the first and/or second option is disabled
+            if self.index > len(self.options) - 1:
+                self.index = 0
+            else:
+                self.index += 1
 
     def register_custom_handler(
         self, key: KEY_T, func: Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]
@@ -66,13 +80,20 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
     def move_up(self) -> None:
         self.index -= 1
-        if self.index < 0:
-            self.index = len(self.options) - 1
+
+        # this is in case of 2 or more disabled options in a row
+        while self.index in self.disabled_options or self.index < 0:
+            if self.index < 0:  # in case the bottom option is disabled
+                self.index = len(self.options)
+            self.index -= 1
 
     def move_down(self) -> None:
         self.index += 1
-        if self.index >= len(self.options):
-            self.index = 0
+        # this is in case of 2 or more disabled options in a row
+        while self.index in self.disabled_options or self.index > len(self.options) - 1:
+            if self.index > len(self.options) - 1:  # in case the bottom option is disabled
+                self.index = -1
+            self.index += 1
 
     def mark_index(self) -> None:
         if self.multiselect:
@@ -114,6 +135,8 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
                 line = ("{0} {1}".format(prefix, option_as_str), format)
             else:
                 line = "{0} {1}".format(prefix, option_as_str)
+            if index in self.disabled_options:
+                line = '  ' + ''.join([u'\u0336{}'.format(c) for c in line if c != " "])  # adds a cross-out effect
             lines.append(line)  # type: ignore[arg-type]
 
         return lines
@@ -209,6 +232,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
+    disabled_options: tuple = (),
 ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
     """Construct and start a :class:`Picker <Picker>`.
 
@@ -227,5 +251,6 @@ def pick(
         multiselect,
         min_selection_count,
         options_map_func,
+        disabled_options,
     )
     return picker.start()
