@@ -6,7 +6,7 @@ from pick import Picker
 def test_move_up_down():
     title = "Please choose an option: "
     options = ["option1", "option2", "option3"]
-    picker: Picker[str, str] = Picker(options, title)
+    picker: Picker[str] = Picker(options, title)
     picker.move_up()
     assert picker.get_selected() == ("option3", 2)
     picker.move_down()
@@ -17,14 +17,14 @@ def test_move_up_down():
 def test_default_index():
     title = "Please choose an option: "
     options = ["option1", "option2", "option3"]
-    picker: Picker[str, str] = Picker(options, title, default_index=1)
+    picker: Picker[str] = Picker(options, title, default_index=1)
     assert picker.get_selected() == ("option2", 1)
 
 
 def test_get_lines():
     title = "Please choose an option: "
     options = ["option1", "option2", "option3"]
-    picker: Picker[str, str] = Picker(options, title, indicator="*")
+    picker: Picker[str] = Picker(options, title, indicator="*")
     lines, current_line = picker.get_lines()
     assert lines == [title, "", "* option1", "  option2", "  option3"]
     assert current_line == 3
@@ -32,7 +32,7 @@ def test_get_lines():
 
 def test_no_title():
     options = ["option1", "option2", "option3"]
-    picker: Picker[str, str] = Picker(options)
+    picker: Picker[str] = Picker(options)
     lines, current_line = picker.get_lines()
     assert current_line == 1
 
@@ -40,7 +40,7 @@ def test_no_title():
 def test_multi_select():
     title = "Please choose an option: "
     options = ["option1", "option2", "option3"]
-    picker: Picker[str, str] = Picker(
+    picker: Picker[str] = Picker(
         options, title, multiselect=True, min_selection_count=1
     )
     assert picker.get_selected() == []
@@ -58,7 +58,7 @@ def test_options_map_func():
     def get_label(option: Dict[str, str]) -> Optional[str]:
         return option.get("label")
 
-    picker: Picker[str, Dict[str, str]] = Picker(
+    picker: Picker[Dict[str, str]] = Picker(
         options, title, indicator="*", options_map_func=get_label
     )
     lines, current_line = picker.get_lines()
