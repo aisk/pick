@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar
+from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar, Sequence
 
 __all__ = ["Picker", "pick"]
 
@@ -20,7 +20,7 @@ PICK_RETURN_T = Tuple[OPTIONS_MAP_VALUE_T, int]
 class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     """The :class:`Picker <Picker>` object
 
-    :param options: a list of options to choose from
+    :param options: a sequence of options to choose from
     :param title: (optional) a title above options list
     :param multiselect: (optional) if true its possible to select multiple values by hitting SPACE, defaults to False
     :param indicator: (optional) custom the selection indicator
@@ -28,7 +28,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     :param options_map_func: (optional) a mapping function to pass each option through before displaying
     """
 
-    options: List[OPTIONS_MAP_VALUE_T]
+    options: Sequence[OPTIONS_MAP_VALUE_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
@@ -202,7 +202,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
 
 
 def pick(
-    options: List[OPTIONS_MAP_VALUE_T],
+    options: Sequence[OPTIONS_MAP_VALUE_T],
     title: Optional[str] = None,
     indicator: str = "*",
     default_index: int = 0,
