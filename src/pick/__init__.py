@@ -1,15 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import (
-    Callable,
-    Generic,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import List, Optional, Sequence, Tuple, Union
 
 __all__ = ["Picker", "pick"]
 
@@ -23,19 +14,17 @@ SYMBOL_CIRCLE_FILLED = "◉"
 SYMBOL_CIRCLE_EMPTY = "◯"
 
 KEY_T = int
-OPTIONS_MAP_VALUE_T = TypeVar("OPTIONS_MAP_VALUE_T")
-PICK_RETURN_T = Tuple[OPTIONS_MAP_VALUE_T, int]
+PICK_RETURN_T = Tuple[str, int]
 
 
 @dataclass
-class Picker(Generic[OPTIONS_MAP_VALUE_T]):
-    options: Sequence[OPTIONS_MAP_VALUE_T]
+class Picker:
+    options: Sequence[str]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     scroll_top: int = field(init=False, default=0)
@@ -51,9 +40,6 @@ class Picker(Generic[OPTIONS_MAP_VALUE_T]):
             raise ValueError(
                 "min_selection_count is bigger than the available options, you will not be able to make any selection"
             )
-
-        if not callable(self.options_map_func):
-            raise ValueError("options_map_func must be a callable function")
 
         self.index = self.default_index
 
@@ -107,7 +93,7 @@ class Picker(Generic[OPTIONS_MAP_VALUE_T]):
                 )
                 prefix = f"{prefix} {symbol} "
 
-            option_as_str = self.options_map_func(option)
+            option_as_str = str(option)
             lines.append(f"{prefix} {option_as_str}")
 
         return lines
@@ -180,13 +166,12 @@ class Picker(Generic[OPTIONS_MAP_VALUE_T]):
 
 
 def pick(
-    options: Sequence[OPTIONS_MAP_VALUE_T],
+    options: Sequence[str],
     title: Optional[str] = None,
     indicator: str = "*",
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
 ):
     picker: Picker = Picker(
         options,
@@ -195,6 +180,5 @@ def pick(
         default_index,
         multiselect,
         min_selection_count,
-        options_map_func,
     )
     return picker.start()

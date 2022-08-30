@@ -56,41 +56,6 @@ interactive selection list in the terminal.
   multiple items by hitting SPACE
 - `min_selection_count`: (optional) for multi select feature to
   dictate a minimum of selected items before continuing
-- `options_map_func`: (optional) a mapping function to pass each
-  option through before displaying
-
-## Options Map Function
-
-If your options are not in a format that you want displayed (such as a
-dictionary), you can pass in a mapping function which each option will
-be run through. The return value of the function will be displayed.
-
-> the selected option returned will be the original value and not the
-> displayed return result from the `options_map_func` function.
-
-**pick** options map function example:
-
-    >>> from pick import pick
-
-    >>> title = 'Please choose an option: '
-    >>> options = [{'label': 'option1'}, {'label': 'option2'}, {'label': 'option3'}]
-
-    >>> def get_label(option): return option.get('label')
-
-    >>> selected = pick(options, title, indicator='*', options_map_func=get_label)
-    >>> print(selected)
-
-**displays**:
-
-    Please choose an option:
-
-    * option1
-      option2
-      option3
-
-**outputs**:
-
-    >>> ({ 'label': 'option1' }, 0)
 
 ## Community Projects
 
