@@ -1,6 +1,16 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar, Sequence
+from typing import (
+    Generic,
+    Callable,
+    List,
+    Optional,
+    Dict,
+    Union,
+    Tuple,
+    TypeVar,
+    Sequence,
+)
 
 __all__ = ["Picker", "pick"]
 
