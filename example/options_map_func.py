@@ -14,9 +14,7 @@ def get_description_for_display(option):
     return "{0} (grow on {1})".format(option.get("name"), option.get("grow_on"))
 
 
-selection = pick(
+option, index = pick(
     options, title, indicator="=>", options_map_func=get_description_for_display
 )
-assert len(selection) == 1
-option, index = selection[0]
 print(option, index)
