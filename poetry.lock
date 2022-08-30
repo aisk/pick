@@ -224,6 +224,27 @@ toml = "*"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-mypy"
+version = "0.9.1"
+description = "Mypy static type checker plugin for Pytest"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+attrs = ">=19.0"
+filelock = ">=3.0"
+mypy = [
+    {version = ">=0.780", markers = "python_version >= \"3.9\""},
+    {version = ">=0.700", markers = "python_version >= \"3.8\" and python_version < \"3.9\""},
+    {version = ">=0.500", markers = "python_version < \"3.8\""},
+]
+pytest = [
+    {version = ">=4.6", markers = "python_version >= \"3.6\" and python_version < \"3.10\""},
+    {version = ">=6.2", markers = "python_version >= \"3.10\""},
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
@@ -313,7 +334,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7"
-content-hash = "e568d233095e1d85550e7047fd32b8a47bb52bfcc8b1beb1d7145c35ccd82bbd"
+content-hash = "e5a5a6af8b00478191c8c2edbc8f1fc9342e46ee2e3e4e9b55e35d8962c3dc83"
 
 [metadata.files]
 atomicwrites = []
@@ -335,6 +356,7 @@ pre-commit = []
 py = []
 pyparsing = []
 pytest = []
+pytest-mypy = []
 pyyaml = []
 six = []
 toml = []

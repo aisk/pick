@@ -229,7 +229,7 @@ def pick(
       >>> options = ['option1', 'option2', 'option3']
       >>> option, index = pick(options, title)
     """
-    picker = Picker(
+    picker: Picker = Picker(
         options,
         title,
         indicator,
