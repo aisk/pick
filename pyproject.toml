@@ -15,7 +15,7 @@ windows-curses = {version = "^2.2.0", platform = "win32"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
-mypy = "^0.961"
+mypy = "^0.971"
 pre-commit = "^2.20.0"
 
 [build-system]
