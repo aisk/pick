@@ -7,7 +7,9 @@
 **pick** is a small python library to help you create curses based
 interactive selection list in the terminal.
 
-![Demo](https://github.com/wong2/pick/raw/master/example/basic.gif)
+|         Basic          |         Multiselect          |
+| :--------------------: | :--------------------------: |
+| ![](example/basic.gif) | ![](example/multiselect.gif) |
 
 ## Installation
 
