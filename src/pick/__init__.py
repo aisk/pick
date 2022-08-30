@@ -20,6 +20,9 @@ KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
 
+SYMBOL_CIRCLE_FILLED = "◉"
+SYMBOL_CIRCLE_EMPTY = "◯"
+
 CUSTOM_HANDLER_RETURN_T = TypeVar("CUSTOM_HANDLER_RETURN_T")
 KEY_T = int
 OPTIONS_MAP_VALUE_T = TypeVar("OPTIONS_MAP_VALUE_T")
@@ -108,30 +111,31 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             return self.title.split("\n") + [""]
         return []
 
-    def get_option_lines(self) -> Union[List[str], List[Tuple[str, int]]]:
-        lines: Union[List[str], List[Tuple[str, int]]] = []  # type: ignore[assignment]
+    def get_option_lines(self) -> List[str]:
+        lines: List[str] = []
         for index, option in enumerate(self.options):
-            option_as_str = self.options_map_func(option)
-
             if index == self.index:
                 prefix = self.indicator
             else:
                 prefix = len(self.indicator) * " "
 
-            line: Union[Tuple[str, int], str]
-            if self.multiselect and index in self.selected_indexes:
-                format = curses.color_pair(1)
-                line = ("{0} {1}".format(prefix, option_as_str), format)
-            else:
-                line = "{0} {1}".format(prefix, option_as_str)
-            lines.append(line)  # type: ignore[arg-type]
+            if self.multiselect:
+                symbol = (
+                    SYMBOL_CIRCLE_FILLED
+                    if index in self.selected_indexes
+                    else SYMBOL_CIRCLE_EMPTY
+                )
+                prefix = f"{prefix} {symbol} "
+
+            option_as_str = self.options_map_func(option)
+            lines.append(f"{prefix} {option_as_str}")
 
         return lines
 
     def get_lines(self) -> Tuple[List, int]:
         title_lines = self.get_title_lines()
         option_lines = self.get_option_lines()
-        lines = title_lines + option_lines  # type: ignore[operator]
+        lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
@@ -154,10 +158,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         lines_to_draw = lines[self.scroll_top : self.scroll_top + max_rows]
 
         for line in lines_to_draw:
-            if type(line) is tuple:
-                screen.addnstr(y, x, line[0], max_x - 2, line[1])
-            else:
-                screen.addnstr(y, x, line, max_x - 2)
+            screen.addnstr(y, x, line, max_x - 2)
             y += 1
 
         screen.refresh()
@@ -192,9 +193,6 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             curses.use_default_colors()
             # hide the cursor
             curses.curs_set(0)
-            # add some color for multi_select
-            # @todo make colors configurable
-            curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_WHITE)
         except:
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
