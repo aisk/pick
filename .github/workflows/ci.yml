@@ -19,6 +19,6 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Static type checking
-        run: mypy .
+        run: poetry run mypy .
       - name: Run test
         run: poetry run pytest
