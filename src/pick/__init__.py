@@ -1,8 +1,14 @@
 import curses
 from dataclasses import dataclass, field
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, TypeVar, Union, Generic
 
-__all__ = ["Picker", "pick"]
+__all__ = ["Picker", "pick", "Option"]
+
+
+@dataclass
+class Option:
+    label: str
+    value: Any
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -13,13 +19,13 @@ KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
 SYMBOL_CIRCLE_FILLED = "◉"
 SYMBOL_CIRCLE_EMPTY = "◯"
 
-KEY_T = int
-PICK_RETURN_T = Tuple[str, int]
+OPTION_T = TypeVar("OPTION_T", str, Option)
+PICK_RETURN_T = Tuple[OPTION_T, int]
 
 
 @dataclass
-class Picker:
-    options: Sequence[str]
+class Picker(Generic[OPTION_T]):
+    options: Sequence[OPTION_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
@@ -93,7 +99,7 @@ class Picker:
                 )
                 prefix = f"{prefix} {symbol} "
 
-            option_as_str = str(option)
+            option_as_str = option.label if isinstance(option, Option) else option
             lines.append(f"{prefix} {option_as_str}")
 
         return lines
@@ -166,7 +172,7 @@ class Picker:
 
 
 def pick(
-    options: Sequence[str],
+    options: Sequence[OPTION_T],
     title: Optional[str] = None,
     indicator: str = "*",
     default_index: int = 0,

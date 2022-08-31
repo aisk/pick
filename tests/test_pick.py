@@ -1,4 +1,4 @@
-from pick import Picker
+from pick import Picker, Option
 
 
 def test_move_up_down():
@@ -45,3 +45,13 @@ def test_multi_select():
     picker.move_down()
     picker.mark_index()
     assert picker.get_selected() == [("option1", 0), ("option2", 1)]
+
+
+def test_option():
+    options = [Option("option1", 101), Option("option2", 102), Option("option3", 103)]
+    picker = Picker(options)
+    picker.move_down()
+    option, index = picker.get_selected()
+    assert index == 1
+    assert isinstance(option, Option)
+    assert option.value == 102
