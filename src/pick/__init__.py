@@ -31,16 +31,6 @@ PICK_RETURN_T = Tuple[OPTIONS_MAP_VALUE_T, int]
 
 @dataclass
 class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
-    """The :class:`Picker <Picker>` object
-
-    :param options: a sequence of options to choose from
-    :param title: (optional) a title above options list
-    :param multiselect: (optional) if true its possible to select multiple values by hitting SPACE, defaults to False
-    :param indicator: (optional) custom the selection indicator
-    :param default_index: (optional) set this if the default selected option is not the first one
-    :param options_map_func: (optional) a mapping function to pass each option through before displaying
-    """
-
     options: Sequence[OPTIONS_MAP_VALUE_T]
     title: Optional[str] = None
     indicator: str = "*"
@@ -218,15 +208,6 @@ def pick(
     min_selection_count: int = 0,
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
 ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
-    """Construct and start a :class:`Picker <Picker>`.
-
-    Usage::
-
-      >>> from pick import pick
-      >>> title = 'Please choose an option: '
-      >>> options = ['option1', 'option2', 'option3']
-      >>> option, index = pick(options, title)
-    """
     picker: Picker = Picker(
         options,
         title,
