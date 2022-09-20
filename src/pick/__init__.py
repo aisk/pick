@@ -97,7 +97,7 @@ class Picker(Generic[OPTION_T]):
                     if index in self.selected_indexes
                     else SYMBOL_CIRCLE_EMPTY
                 )
-                prefix = f"{prefix} {symbol} "
+                prefix = f"{prefix} {symbol}"
 
             option_as_str = option.label if isinstance(option, Option) else option
             lines.append(f"{prefix} {option_as_str}")
