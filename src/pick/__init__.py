@@ -16,8 +16,8 @@ KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
 
-SYMBOL_CIRCLE_FILLED = "◉"
-SYMBOL_CIRCLE_EMPTY = "◯"
+SYMBOL_CIRCLE_FILLED = "(x)"
+SYMBOL_CIRCLE_EMPTY = "( )"
 
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
