@@ -129,8 +129,11 @@ class Picker(Generic[OPTION_T]):
 
         lines_to_draw = lines[self.scroll_top : self.scroll_top + max_rows]
 
-        for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
+        for i, line in enumerate(lines_to_draw):
+            if i + self.scroll_top + 1 == current_line:
+                screen.addnstr(y, x, line, max_x - 2, curses.color_pair(1))
+            else:
+                screen.addnstr(y, x, line, max_x - 2)
             y += 1
 
         screen.refresh()
@@ -157,6 +160,7 @@ class Picker(Generic[OPTION_T]):
         try:
             # use the default colors of the terminal
             curses.use_default_colors()
+            curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
             # hide the cursor
             curses.curs_set(0)
         except:
