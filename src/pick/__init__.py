@@ -33,7 +33,6 @@ class Picker(Generic[OPTION_T]):
     min_selection_count: int = 0
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
-    scroll_top: int = field(init=False, default=0)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -122,12 +121,11 @@ class Picker(Generic[OPTION_T]):
         lines, current_line = self.get_lines()
 
         # calculate how many lines we should scroll, relative to the top
-        if current_line <= self.scroll_top:
-            self.scroll_top = 0
-        elif current_line - self.scroll_top > max_rows:
-            self.scroll_top = current_line - max_rows
+        scroll_top = 0
+        if current_line > max_rows:
+            scroll_top = current_line - max_rows
 
-        lines_to_draw = lines[self.scroll_top : self.scroll_top + max_rows]
+        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
         for line in lines_to_draw:
             screen.addnstr(y, x, line, max_x - 2)
