@@ -185,7 +185,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    stdscr: Optional[curses.window] = None
+    screen: Optional[curses.window] = None
 ):
     picker: Picker = Picker(
         options,
@@ -194,6 +194,6 @@ def pick(
         default_index,
         multiselect,
         min_selection_count,
-        screen=stdscr
+        screen
     )
     return picker.start()
