@@ -33,7 +33,7 @@ class Picker(Generic[OPTION_T]):
     min_selection_count: int = 0
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
-    screen: Optional[Any] = None  # curses._CursesWindow
+    screen: Optional[curses.window] = None
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -185,7 +185,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    stdscr: Optional[Any] = None  # curses._CursesWindow
+    stdscr: Optional[curses.window] = None
 ):
     picker: Picker = Picker(
         options,
