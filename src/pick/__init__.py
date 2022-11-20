@@ -33,6 +33,7 @@ class Picker(Generic[OPTION_T]):
     min_selection_count: int = 0
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
+    screen: Optional[Any] = None  # curses._CursesWindow
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -166,6 +167,14 @@ class Picker(Generic[OPTION_T]):
         return self.run_loop(screen)
 
     def start(self):
+        if self.screen:
+            # Given an existing screen
+            # don't make any lasting changes
+            last_cur = curses.curs_set(0)
+            ret = self.run_loop(self.screen)
+            if last_cur:
+                curses.curs_set(last_cur)
+            return ret
         return curses.wrapper(self._start)
 
 
@@ -176,6 +185,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
+    stdscr: Optional[Any] = None  # curses._CursesWindow
 ):
     picker: Picker = Picker(
         options,
@@ -184,5 +194,6 @@ def pick(
         default_index,
         multiselect,
         min_selection_count,
+        screen=stdscr
     )
     return picker.start()

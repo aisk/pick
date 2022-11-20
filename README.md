@@ -56,6 +56,7 @@ interactive selection list in the terminal.
   multiple items by hitting SPACE
 - `min_selection_count`: (optional) for multi select feature to
   dictate a minimum of selected items before continuing
+- `stdscr`: (optional), if you are using `pick` within an existing curses application set this to your existing `stdscr` object.  It is assumed this has initialised in the standard way (e.g. via `curses.wrapper()`, or `curses.noecho(); curses.cbreak(); stdscr.kepad(True)`)
 
 ## Community Projects
 
