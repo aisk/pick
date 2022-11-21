@@ -33,7 +33,7 @@ class Picker(Generic[OPTION_T]):
     min_selection_count: int = 0
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
-    screen: Optional[curses.window] = None
+    screen: Optional["curses._CursesWindow"] = None
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -111,7 +111,7 @@ class Picker(Generic[OPTION_T]):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self, screen) -> None:
+    def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
         screen.clear()
 
@@ -134,7 +134,9 @@ class Picker(Generic[OPTION_T]):
 
         screen.refresh()
 
-    def run_loop(self, screen) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
+    def run_loop(
+        self, screen: "curses._CursesWindow"
+    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -162,7 +164,7 @@ class Picker(Generic[OPTION_T]):
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
-    def _start(self, screen):
+    def _start(self, screen: "curses._CursesWindow"):
         self.config_curses()
         return self.run_loop(screen)
 
@@ -185,7 +187,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    screen: Optional[curses.window] = None
+    screen: Optional["curses._CursesWindow"] = None,
 ):
     picker: Picker = Picker(
         options,
@@ -194,6 +196,6 @@ def pick(
         default_index,
         multiselect,
         min_selection_count,
-        screen
+        screen,
     )
     return picker.start()
