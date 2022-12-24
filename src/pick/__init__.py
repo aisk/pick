@@ -34,6 +34,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
+    position: dict = {'y0': 1, 'x0': 1}
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -111,11 +112,10 @@ class Picker(Generic[OPTION_T]):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self, screen: "curses._CursesWindow") -> None:
+    def draw(self, screen: "curses._CursesWindow", position: dict) -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
-        screen.clear()
+        x, y = position['x0'], position['y0']  # start point
 
-        x, y = 1, 1  # start point
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
 
@@ -129,16 +129,16 @@ class Picker(Generic[OPTION_T]):
         lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
         for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
+            screen.addstr(y, x, line, max_x - 2)
             y += 1
 
         screen.refresh()
 
     def run_loop(
-        self, screen: "curses._CursesWindow"
+        self, screen: "curses._CursesWindow", position: dict
     ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
-            self.draw(screen)
+            self.draw(screen, position)
             c = screen.getch()
             if c in KEYS_UP:
                 self.move_up()
@@ -164,16 +164,16 @@ class Picker(Generic[OPTION_T]):
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
-    def _start(self, screen: "curses._CursesWindow"):
+    def _start(self, screen: "curses._CursesWindow", position: dict):
         self.config_curses()
-        return self.run_loop(screen)
+        return self.run_loop(screen, position)
 
     def start(self):
         if self.screen:
             # Given an existing screen
             # don't make any lasting changes
             last_cur = curses.curs_set(0)
-            ret = self.run_loop(self.screen)
+            ret = self.run_loop(self.screen, self.position)
             if last_cur:
                 curses.curs_set(last_cur)
             return ret
@@ -188,6 +188,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
+    position: dict = {'y0': 1, 'x0': 1}
 ):
     picker: Picker = Picker(
         options,
@@ -197,5 +198,6 @@ def pick(
         multiselect,
         min_selection_count,
         screen,
+        position,
     )
     return picker.start()
