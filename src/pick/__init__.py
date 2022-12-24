@@ -34,7 +34,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
-    position: dict = field(default_factory={'y0': 1, 'x0': 1})
+    position: dict = field(default_factory={"y0": 1, "x0": 1})
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -114,7 +114,7 @@ class Picker(Generic[OPTION_T]):
 
     def draw(self, screen: "curses._CursesWindow", position: dict) -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
-        x, y = position['x0'], position['y0']  # start point
+        x, y = position["x0"], position["y0"]  # start point
 
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
@@ -188,7 +188,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
-    position: dict = {'y0': 1, 'x0': 1}
+    position: dict = {"y0": 1, "x0": 1}
 ):
     picker: Picker = Picker(
         options,
