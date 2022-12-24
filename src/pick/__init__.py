@@ -34,7 +34,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
-    position: dict = {'y0': 1, 'x0': 1}
+    position: dict = Optional[{'y0': 1, 'x0': 1}]
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
