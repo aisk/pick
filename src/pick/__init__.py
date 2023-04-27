@@ -1,6 +1,15 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Sequence, Tuple, TypeVar, Union, Generic
+from typing import (
+    Any,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    Generic,
+)
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -15,12 +24,12 @@ KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
 KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
+KEYS_QUIT = (ord("q"),)
 
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
 
-OPTION_T = TypeVar("OPTION_T", str, Option)
-PICK_RETURN_T = Tuple[OPTION_T, int]
+OPTION_T = TypeVar("OPTION_T")
 
 
 @dataclass
@@ -34,18 +43,20 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
+    allow_quit: bool = field(default=True)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
             raise ValueError("options should not be an empty list")
 
-        if self.default_index >= len(self.options):
-            raise ValueError("default_index should be less than the length of options")
+        # support negative index
+        if self.default_index not in range(-len(self.options), len(self.options)):
+            raise ValueError("default_index out of range")
+        if self.default_index < 0:
+            self.default_index += len(self.options)
 
         if self.multiselect and self.min_selection_count > len(self.options):
-            raise ValueError(
-                "min_selection_count is bigger than the available options, you will not be able to make any selection"
-            )
+            raise ValueError("min_selection_count out of range")
 
         self.index = self.default_index
 
@@ -60,13 +71,14 @@ class Picker(Generic[OPTION_T]):
             self.index = 0
 
     def mark_index(self) -> None:
-        if self.multiselect:
-            if self.index in self.selected_indexes:
-                self.selected_indexes.remove(self.index)
-            else:
-                self.selected_indexes.append(self.index)
+        if self.index in self.selected_indexes:
+            self.selected_indexes.remove(self.index)
+        else:
+            self.selected_indexes.append(self.index)
 
-    def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
+    def get_selected(
+        self,
+    ):
         """return the current selected option as a tuple: (option, index)
         or as a list of tuples (in case multiselect==True)
         """
@@ -134,9 +146,7 @@ class Picker(Generic[OPTION_T]):
 
         screen.refresh()
 
-    def run_loop(
-        self, screen: "curses._CursesWindow"
-    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
+    def run_loop(self, screen: "curses._CursesWindow"):
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -153,6 +163,8 @@ class Picker(Generic[OPTION_T]):
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multiselect:
                 self.mark_index()
+            elif c in KEYS_QUIT and self.allow_quit:
+                return None, None
 
     def config_curses(self) -> None:
         try:
@@ -188,7 +200,11 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
-):
+    allow_quit = True
+) -> Union[
+    List[Tuple[Optional[OPTION_T], Optional[int]]],
+    Tuple[Optional[OPTION_T], Optional[int]],
+]:
     picker: Picker = Picker(
         options,
         title,
@@ -197,5 +213,6 @@ def pick(
         multiselect,
         min_selection_count,
         screen,
+        allow_quit
     )
     return picker.start()
