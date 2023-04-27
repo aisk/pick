@@ -24,7 +24,7 @@ KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
 KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
-KEYS_QUIT = (27, ord("q"))
+KEYS_QUIT = (ord("q"),)
 
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
@@ -43,6 +43,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
+    allow_quit: bool = field(default=True)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -162,7 +163,7 @@ class Picker(Generic[OPTION_T]):
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multiselect:
                 self.mark_index()
-            elif c in KEYS_QUIT:
+            elif c in KEYS_QUIT and self.allow_quit:
                 return None, None
 
     def config_curses(self) -> None:
@@ -199,6 +200,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
+    allow_quit = True
 ) -> Union[
     List[Tuple[Optional[OPTION_T], Optional[int]]],
     Tuple[Optional[OPTION_T], Optional[int]],
@@ -211,5 +213,6 @@ def pick(
         multiselect,
         min_selection_count,
         screen,
+        allow_quit
     )
     return picker.start()
