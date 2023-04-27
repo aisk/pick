@@ -57,6 +57,7 @@ interactive selection list in the terminal.
 - `min_selection_count`: (optional) for multi select feature to
   dictate a minimum of selected items before continuing
 - `screen`: (optional), if you are using `pick` within an existing curses application set this to your existing `screen` object.  It is assumed this has initialised in the standard way (e.g. via `curses.wrapper()`, or `curses.noecho(); curses.cbreak(); screen.kepad(True)`)
+- `allow_quit`: (optional), if True, pressing Q quits the menu and returns `(None, None)`; default is True 
 
 ## Community Projects
 
