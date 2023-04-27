@@ -44,7 +44,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
-    quit_keys: Optional[Iterable[str]] = field(default=('q',), kw_only=True)
+    quit_keys: Optional[Iterable[str]] = field(default=("q",), kw_only=True)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -61,7 +61,7 @@ class Picker(Generic[OPTION_T]):
 
         self.index = self.default_index
         self.KEYS_QUIT = (
-            map(ord, self.quit_keys) if self.quit_keys is not None else None
+            map(ord, self.quit_keys) if self.quit_keys is not None else tuple()
         )
 
     def move_up(self) -> None:
@@ -167,7 +167,7 @@ class Picker(Generic[OPTION_T]):
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multiselect:
                 self.mark_index()
-            elif self.KEYS_QUIT is not None and c in self.KEYS_QUIT:
+            elif c in KEYS_QUIT:
                 return None, None
 
     def config_curses(self) -> None:
@@ -205,7 +205,7 @@ def pick(
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
     *,
-    quit_keys: Optional[Iterable[str]] = ('q',),
+    quit_keys: Optional[Iterable[str]] = ("q",),
 ) -> Union[
     List[Tuple[Optional[OPTION_T], Optional[int]]],
     Tuple[Optional[OPTION_T], Optional[int]],
