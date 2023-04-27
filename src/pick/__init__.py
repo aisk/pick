@@ -2,7 +2,6 @@ import curses
 from dataclasses import dataclass, field
 from typing import (
     Any,
-    Iterable,
     List,
     Optional,
     Sequence,
@@ -25,7 +24,7 @@ KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
 KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
-KEYS_QUIT = (ord("q"),)
+KEYS_QUIT = (27, ord("q"))
 
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
@@ -44,7 +43,6 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
-    quit_keys: Optional[Iterable[str]] = field(default=("q",), kw_only=True)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -60,9 +58,6 @@ class Picker(Generic[OPTION_T]):
             raise ValueError("min_selection_count out of range")
 
         self.index = self.default_index
-        self.KEYS_QUIT = (
-            map(ord, self.quit_keys) if self.quit_keys is not None else tuple()
-        )
 
     def move_up(self) -> None:
         self.index -= 1
@@ -204,8 +199,6 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
-    *,
-    quit_keys: Optional[Iterable[str]] = ("q",),
 ) -> Union[
     List[Tuple[Optional[OPTION_T], Optional[int]]],
     Tuple[Optional[OPTION_T], Optional[int]],
@@ -218,6 +211,5 @@ def pick(
         multiselect,
         min_selection_count,
         screen,
-        quit_keys=quit_keys,
     )
     return picker.start()
