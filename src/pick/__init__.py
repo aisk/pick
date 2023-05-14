@@ -49,7 +49,7 @@ class Picker(Generic[OPTION_T]):
             )
 
         self.index = self.default_index
-        while self.index not in self.excluded_indexes:
+        while self.index in self.excluded_indexes:
             self.index += 1
 
     def move_up(self) -> None:
@@ -57,7 +57,7 @@ class Picker(Generic[OPTION_T]):
         if self.index < 0:
             self.index = len(self.options) - 1
 
-        while self.index not in self.excluded_indexes:
+        while self.index in self.excluded_indexes:
             self.index += 1
 
     def move_down(self) -> None:
@@ -67,9 +67,9 @@ class Picker(Generic[OPTION_T]):
 
         import logging
         logging.info(self.excluded_indexes)
-        while self.index not in self.excluded_indexes:
+        while self.index in self.excluded_indexes:
             self.index -= 1
-            
+
     def mark_index(self) -> None:
         if self.multiselect:
             if self.index in self.selected_indexes:
