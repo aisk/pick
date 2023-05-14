@@ -31,7 +31,8 @@ class Picker(Generic[OPTION_T]):
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    selected_indexes: List[int] = field(init=False, default_factory=list)
+    selected_indexes: List[int] = field(init=False, default_factory=list),
+    excluded_indexes: List[int] = list(),
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
 
@@ -53,11 +54,22 @@ class Picker(Generic[OPTION_T]):
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
+        
+        while 1:
+            if self.index not in excludes_indexes: 
+                break
+            self.indexes -= 1
 
     def move_down(self) -> None:
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
+            
+        while 1:
+            if self.index not in self.excludes_indexes: 
+                break
+            self.indexes += 1
+
 
     def mark_index(self) -> None:
         if self.multiselect:
@@ -187,6 +199,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
+    excluded_indexes: [],
     screen: Optional["curses._CursesWindow"] = None,
 ):
     picker: Picker = Picker(
@@ -196,6 +209,7 @@ def pick(
         default_index,
         multiselect,
         min_selection_count,
+        excluded_indexes,
         screen,
     )
     return picker.start()
