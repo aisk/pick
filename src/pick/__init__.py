@@ -65,8 +65,6 @@ class Picker(Generic[OPTION_T]):
         if self.index >= len(self.options):
             self.index = 0
 
-        import logging
-        logging.info(self.excluded_indexes)
         while self.index in self.excluded_indexes:
             self.index -= 1
 
