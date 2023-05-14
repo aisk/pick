@@ -199,7 +199,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    excluded_indexes: [],
+    excluded_indexes = list(),
     screen: Optional["curses._CursesWindow"] = None,
 ):
     picker: Picker = Picker(
