@@ -31,8 +31,8 @@ class Picker(Generic[OPTION_T]):
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    selected_indexes: List[int] = field(init=False, default_factory=list),
-    excluded_indexes: List[int] = list(),
+    selected_indexes: List[int] = field(init=False, default_factory=list)
+    excluded_indexes: List[int] = field(default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
 
@@ -58,17 +58,19 @@ class Picker(Generic[OPTION_T]):
         while 1:
             if self.index not in self.excluded_indexes:
                 break
-            self.indexes -= 1
+            self.index -= 1
 
     def move_down(self) -> None:
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
 
+        import logging
+        logging.info(self.excluded_indexes)
         while 1:
             if self.index not in self.excluded_indexes:
                 break
-            self.indexes += 1
+            self.index += 1
 
     def mark_index(self) -> None:
         if self.multiselect:
