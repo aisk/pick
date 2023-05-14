@@ -54,9 +54,9 @@ class Picker(Generic[OPTION_T]):
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
-        
+
         while 1:
-            if self.index not in excludes_indexes: 
+            if self.index not in self.excluded_indexes:
                 break
             self.indexes -= 1
 
@@ -64,12 +64,11 @@ class Picker(Generic[OPTION_T]):
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
-            
+
         while 1:
-            if self.index not in self.excludes_indexes: 
+            if self.index not in self.excluded_indexes:
                 break
             self.indexes += 1
-
 
     def mark_index(self) -> None:
         if self.multiselect:
@@ -138,7 +137,7 @@ class Picker(Generic[OPTION_T]):
         if current_line > max_rows:
             scroll_top = current_line - max_rows
 
-        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
+        lines_to_draw = lines[scroll_top: scroll_top + max_rows]
 
         for line in lines_to_draw:
             screen.addnstr(y, x, line, max_x - 2)
