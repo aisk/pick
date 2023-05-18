@@ -52,21 +52,23 @@ class Picker(Generic[OPTION_T]):
         while self.index in self.excluded_indexes:
             self.index += 1
 
+    
     def move_up(self) -> None:
         self.index -= 1
-        if self.index < 0:
-            self.index = len(self.options) - 1
-
-        while self.index in self.excluded_indexes:
-            self.index += 1
-
-    def move_down(self) -> None:
-        self.index += 1
-        if self.index >= len(self.options):
-            self.index = 0
 
         while self.index in self.excluded_indexes:
             self.index -= 1
+        print("Here", self.index)
+        if self.index < 0:
+            self.index = len(self.options) - 1
+
+    def move_down(self) -> None:
+        self.index += 1
+
+        while self.index in self.excluded_indexes:
+            self.index += 1
+        if self.index >= len(self.options):
+            self.index = 0
 
     def mark_index(self) -> None:
         if self.multiselect:
