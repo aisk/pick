@@ -58,7 +58,6 @@ class Picker(Generic[OPTION_T]):
 
         while self.index in self.excluded_indexes:
             self.index -= 1
-        print("Here", self.index)
         if self.index < 0:
             self.index = len(self.options) - 1
 
