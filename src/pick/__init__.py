@@ -196,9 +196,12 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    excluded_indexes = list,
+    excluded_indexes = None,
     screen: Optional["curses._CursesWindow"] = None,
 ):
+    if excluded_indexes is None:
+        excluded_indexes = []
+    
     picker: Picker = Picker(
         options,
         title,
