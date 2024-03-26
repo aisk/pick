@@ -152,14 +152,14 @@ class Picker(Generic[OPTION_T]):
         lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
         for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 1)
+            screen.addnstr(y, x, line, max_x//2 - 2)
             y += 1
 
         if self.descriptions:
             description_lines = self.get_description_lines(max_x // 2)
 
             for i, line in enumerate(description_lines):
-                screen.addstr(i + 3, max_x//2 + 1, line, 2 * max_x//2 - 1)
+                screen.addstr(i + 3, max_x//2, line, 2 * max_x//2 - 2)
 
         screen.refresh()
 
