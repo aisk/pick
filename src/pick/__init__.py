@@ -27,6 +27,7 @@ PICK_RETURN_T = Tuple[OPTION_T, int]
 class Picker(Generic[OPTION_T]):
     options: Sequence[OPTION_T]
     title: Optional[str] = None
+    descriptions: Sequence[OPTION_T] = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
@@ -111,6 +112,28 @@ class Picker(Generic[OPTION_T]):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
+    def get_description_lines(self, length) -> List[str]:
+        description = self.descriptions[self.index]
+        description_as_str = description.label if isinstance(description, Option) else description
+
+        description_words = description_as_str.split(" ")
+        description_lines: List[str] = []
+
+        line = ""
+        for i, word in enumerate(description_words):
+            if len(line + " " + word) <= length:
+                if i == 0:
+                    line += word
+                else:
+                    line += " " + word
+            else:
+                description_lines.append(line)
+                line = word
+
+        description_lines.append(line)
+
+        return description_lines
+
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
         screen.clear()
@@ -129,8 +152,14 @@ class Picker(Generic[OPTION_T]):
         lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
         for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
+            screen.addnstr(y, x, line, max_x - 1)
             y += 1
+
+        if self.descriptions:
+            description_lines = self.get_description_lines(max_x // 2)
+
+            for i, line in enumerate(description_lines):
+                screen.addstr(i + 3, max_x//2 + 1, line, 2 * max_x//2 - 1)
 
         screen.refresh()
 
@@ -183,6 +212,7 @@ class Picker(Generic[OPTION_T]):
 def pick(
     options: Sequence[OPTION_T],
     title: Optional[str] = None,
+    descriptions: Sequence[OPTION_T] = None,
     indicator: str = "*",
     default_index: int = 0,
     multiselect: bool = False,
@@ -192,6 +222,7 @@ def pick(
     picker: Picker = Picker(
         options,
         title,
+        descriptions,
         indicator,
         default_index,
         multiselect,
