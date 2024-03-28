@@ -27,7 +27,6 @@ PICK_RETURN_T = Tuple[OPTION_T, int]
 class Picker(Generic[OPTION_T]):
     options: Sequence[OPTION_T]
     title: Optional[str] = None
-    descriptions: Sequence[OPTION_T] = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
@@ -49,6 +48,22 @@ class Picker(Generic[OPTION_T]):
             )
 
         self.index = self.default_index
+        self.parse_options()
+
+    def parse_options(self) -> None:
+        if isinstance(self.options, dict):
+            options: List[str] = []
+            descriptions: List[str] = []
+
+            for option in self.options.keys():
+                options.append(option)
+                descriptions.append(self.options[option])
+
+            self.options = options
+            self.descriptions = descriptions
+
+        else:
+            self.descriptions = None
 
     def move_up(self) -> None:
         self.index -= 1
@@ -114,9 +129,7 @@ class Picker(Generic[OPTION_T]):
 
     def get_description_lines(self, length) -> List[str]:
         description = self.descriptions[self.index]
-        description_as_str = description.label if isinstance(description, Option) else description
-
-        description_words = description_as_str.split(" ")
+        description_words = description.split(" ")
         description_lines: List[str] = []
 
         line = ""
@@ -156,7 +169,7 @@ class Picker(Generic[OPTION_T]):
             y += 1
 
         if self.descriptions:
-            description_lines = self.get_description_lines(max_x // 2)
+            description_lines = self.get_description_lines(max_x//2)
 
             for i, line in enumerate(description_lines):
                 screen.addstr(i + 3, max_x//2, line, 2 * max_x//2 - 2)
@@ -212,7 +225,6 @@ class Picker(Generic[OPTION_T]):
 def pick(
     options: Sequence[OPTION_T],
     title: Optional[str] = None,
-    descriptions: Sequence[OPTION_T] = None,
     indicator: str = "*",
     default_index: int = 0,
     multiselect: bool = False,
@@ -222,7 +234,6 @@ def pick(
     picker: Picker = Picker(
         options,
         title,
-        descriptions,
         indicator,
         default_index,
         multiselect,

@@ -50,8 +50,20 @@ def test_multi_select():
 def test_option():
     options = [Option("option1", 101), Option("option2", 102), Option("option3", 103)]
     picker = Picker(options)
+    assert picker.descriptions is None
     picker.move_down()
     option, index = picker.get_selected()
     assert index == 1
     assert isinstance(option, Option)
     assert option.value == 102
+
+
+def test_description():
+    options = {"option1": "description1", "option2": "description2", "option3": "description3"}
+    picker = Picker(options)
+    assert picker.descriptions == ["description1", "description2", "description3"]
+    picker.move_down()
+    option, index = picker.get_selected()
+    assert index == 1
+    assert option == "option2"
+    assert picker.descriptions[index] == "description2"
