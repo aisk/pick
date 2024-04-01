@@ -8,7 +8,8 @@ __all__ = ["Picker", "pick", "Option"]
 @dataclass
 class Option:
     label: str
-    value: Any
+    value: Any = None
+    description: Optional[str] = None
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -52,18 +53,18 @@ class Picker(Generic[OPTION_T]):
 
     def parse_options(self) -> None:
         if isinstance(self.options, dict):
-            options: List[str] = []
-            descriptions: List[str] = []
+            options: List[Option] = []
 
-            for option in self.options.keys():
-                options.append(option)
-                descriptions.append(self.options[option])
+            for option, description in self.options.items():
+                if description == "":
+                    options.append(Option(option))
+                else:
+                    options.append(Option(option, description=description))
 
             self.options = options
-            self.descriptions = descriptions
 
         else:
-            self.descriptions = None
+            pass
 
     def move_up(self) -> None:
         self.index -= 1
@@ -127,8 +128,7 @@ class Picker(Generic[OPTION_T]):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def get_description_lines(self, length) -> List[str]:
-        description = self.descriptions[self.index]
+    def get_description_lines(self, description, length) -> List[str]:
         description_words = description.split(" ")
         description_lines: List[str] = []
 
@@ -168,8 +168,9 @@ class Picker(Generic[OPTION_T]):
             screen.addnstr(y, x, line, max_x//2 - 2)
             y += 1
 
-        if self.descriptions:
-            description_lines = self.get_description_lines(max_x//2)
+        option = self.options[self.index]
+        if isinstance(option, Option) and option.description is not None:
+            description_lines = self.get_description_lines(option.description, max_x//2)
 
             for i, line in enumerate(description_lines):
                 screen.addstr(i + 3, max_x//2, line, 2 * max_x//2 - 2)

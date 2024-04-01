@@ -11,4 +11,4 @@ options = {
     "Haskell": ""
 }
 option, index = pick(options, title, indicator="=>", default_index=5)
-print(f"You choosed {option} at index {index}")
+print(f"You chose {option} at index {index}")

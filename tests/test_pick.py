@@ -48,22 +48,47 @@ def test_multi_select():
 
 
 def test_option():
-    options = [Option("option1", 101), Option("option2", 102), Option("option3", 103)]
+    options = [Option("option1", 101, "description1"), Option("option2", 102),
+               Option("option3", description="description3"), Option("option4"), "option5"]
     picker = Picker(options)
-    assert picker.descriptions is None
+    option, index = picker.get_selected()
+    assert index == 0
+    assert isinstance(option, Option)
+    assert option.label == "option1"
+    assert option.value == 101
+    assert option.description == "description1"
     picker.move_down()
     option, index = picker.get_selected()
     assert index == 1
     assert isinstance(option, Option)
+    assert option.label == "option2"
     assert option.value == 102
+    picker.move_down()
+    option, index = picker.get_selected()
+    assert index == 2
+    assert isinstance(option, Option)
+    assert option.label == "option3"
+    assert option.description == "description3"
+    picker.move_down()
+    option, index = picker.get_selected()
+    assert index == 3
+    assert isinstance(option, Option)
+    assert option.label == "option4"
+    picker.move_down()
+    option, index = picker.get_selected()
+    assert index == 4
+    assert isinstance(option, str)
 
 
-def test_description():
-    options = {"option1": "description1", "option2": "description2", "option3": "description3"}
+def test_parse_options():
+    options = {"option1": "description1", "option2": ""}
     picker = Picker(options)
-    assert picker.descriptions == ["description1", "description2", "description3"]
+    option, index = picker.get_selected()
+    assert index == 0
+    assert isinstance(option, Option)
+    assert option.description == "description1"
     picker.move_down()
     option, index = picker.get_selected()
     assert index == 1
-    assert option == "option2"
-    assert picker.descriptions[index] == "description2"
+    assert isinstance(option, Option)
+    assert option.description is None

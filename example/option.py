@@ -7,4 +7,4 @@ options = [
     Option("JavaScript", ".js"),
 ]
 option, index = pick(options, title)
-print(f"You choosed {option} at index {index}")
+print(f"You chose {option} at index {index}")
