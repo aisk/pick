@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Any, Optional, TypeVar, Generic
+from typing import Any, List, Tuple, Union, Optional, TypeVar, Generic
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -21,7 +21,7 @@ SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
 
 OPTION_T = TypeVar('OPTION_T', str, Option)
-PICK_RETURN_T = tuple[OPTION_T, int]
+PICK_RETURN_T = Tuple[OPTION_T, int]
 
 @dataclass
 class Picker(Generic[OPTION_T]):
@@ -31,7 +31,7 @@ class Picker(Generic[OPTION_T]):
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    selected_indexes: list[int] = field(init=False, default_factory=list)
+    selected_indexes: List[int] = field(init=False, default_factory=List)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
 
@@ -54,7 +54,7 @@ class Picker(Generic[OPTION_T]):
 
     def parse_options(self) -> None:
         if isinstance(self.options, dict):
-            options: list[Option] = []
+            options: List[Option] = []
             for option, description in self.options.items():
                 if description == "":
                     options.append(Option(option))
@@ -80,7 +80,7 @@ class Picker(Generic[OPTION_T]):
             else:
                 self.selected_indexes.append(self.index)
 
-    def get_selected(self) -> list[PICK_RETURN_T] | PICK_RETURN_T:
+    def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         """return the current selected option as a tuple: (option, index)
         or as a list of tuples (in case multiselect==True)
         """
@@ -92,13 +92,13 @@ class Picker(Generic[OPTION_T]):
         else:
             return self.options[self.index], self.index
 
-    def get_title_lines(self) -> list[str]:
+    def get_title_lines(self) -> List[str]:
         if self.title:
             return self.title.split("\n") + [""]
         return []
 
-    def get_option_lines(self) -> list[str]:
-        lines: list[str] = []
+    def get_option_lines(self) -> List[str]:
+        lines: List[str] = []
         for index, option in enumerate(self.options):
             if index == self.index:
                 prefix = self.indicator
@@ -118,16 +118,16 @@ class Picker(Generic[OPTION_T]):
 
         return lines
 
-    def get_lines(self) -> tuple[list[str], int]:
+    def get_lines(self) -> Tuple[List[str], int]:
         title_lines = self.get_title_lines()
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def get_description_lines(self, description: str, length: int) -> list[str]:
+    def get_description_lines(self, description: str, length: int) -> List[str]:
         description_words = description.split(" ")
-        description_lines: list[str] = []
+        description_lines: List[str] = []
 
         line = ""
         for i, word in enumerate(description_words):
@@ -176,7 +176,7 @@ class Picker(Generic[OPTION_T]):
 
     def run_loop(
         self, screen: "curses._CursesWindow"
-    ) -> list[PICK_RETURN_T] | PICK_RETURN_T:
+    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
