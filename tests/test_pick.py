@@ -1,4 +1,4 @@
-from pick import Picker, Option, OPTION_T
+from pick import Picker, Option
 
 
 def test_move_up_down():
@@ -63,7 +63,8 @@ def test_option():
     assert option[0].description == "description1"
     picker.mark_index()
     selected_options = picker.get_selected()
-    option = selected_options[4]
+    option = selected_options[-1]
+    assert isinstance(option, tuple)
     assert isinstance(option[0], str)
     assert option[0] == "option5"
 
