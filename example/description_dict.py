@@ -8,7 +8,7 @@ options = {
     "PHP": "PHP is a general-purpose scripting language geared towards web development.",
     "C++": "C++ is a high-level, general-purpose programming language created by Danish computer scientist Bjarne Stroustrup, first released in 1985 as an extension of the C programming language.",
     "Erlang": "",
-    "Haskell": ""
+    "Haskell": "",
 }
 option, index = pick(options, title, indicator="=>", default_index=5)
 print(f"You chose {option} at index {index}")
