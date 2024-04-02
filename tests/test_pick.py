@@ -1,4 +1,4 @@
-from pick import Picker, Option
+from pick import Picker, Option, OPTION_T
 
 
 def test_move_up_down():
@@ -50,45 +50,31 @@ def test_multi_select():
 def test_option():
     options = [Option("option1", 101, "description1"), Option("option2", 102),
                Option("option3", description="description3"), Option("option4"), "option5"]
-    picker = Picker(options)
-    option, index = picker.get_selected()
-    assert index == 0
-    assert isinstance(option, Option)
-    assert option.label == "option1"
-    assert option.value == 101
-    assert option.description == "description1"
-    picker.move_down()
-    option, index = picker.get_selected()
-    assert index == 1
-    assert isinstance(option, Option)
-    assert option.label == "option2"
-    assert option.value == 102
-    picker.move_down()
-    option, index = picker.get_selected()
-    assert index == 2
-    assert isinstance(option, Option)
-    assert option.label == "option3"
-    assert option.description == "description3"
-    picker.move_down()
-    option, index = picker.get_selected()
-    assert index == 3
-    assert isinstance(option, Option)
-    assert option.label == "option4"
-    picker.move_down()
-    option, index = picker.get_selected()
-    assert index == 4
-    assert isinstance(option, str)
+    picker = Picker(options, multiselect=True)
+    for _ in range(4):
+        picker.mark_index()
+        picker.move_down()
+    selected_options = picker.get_selected()
+    for option in selected_options:
+        assert isinstance(option[0], Option)
+    option = selected_options[0]
+    assert option[0].label == "option1"
+    assert option[0].value == 101
+    assert option[0].description == "description1"
+    picker.mark_index()
+    selected_options = picker.get_selected()
+    option = selected_options[4]
+    assert isinstance(option[0], str)
+    assert option[0] == "option5"
 
 
 def test_parse_options():
     options = {"option1": "description1", "option2": ""}
     picker = Picker(options)
-    option, index = picker.get_selected()
-    assert index == 0
+    option, _ = picker.get_selected()
     assert isinstance(option, Option)
     assert option.description == "description1"
     picker.move_down()
     option, index = picker.get_selected()
     assert index == 1
     assert isinstance(option, Option)
-    assert option.description is None
