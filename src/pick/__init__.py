@@ -31,7 +31,7 @@ class Picker(Generic[OPTION_T]):
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    selected_indexes: List[int] = field(init=False, default_factory=List)
+    selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
 
