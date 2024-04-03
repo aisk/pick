@@ -10,5 +10,5 @@ options = {
     "Erlang": "",
     "Haskell": "",
 }
-option, index = pick(options, title, indicator="=>", default_index=5)
+option, index = pick(options, title, indicator="=>")
 print(f"You chose {option} at index {index}")

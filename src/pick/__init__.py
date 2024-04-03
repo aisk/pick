@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Any, List, Tuple, Union, Optional, TypeVar, Generic
+from typing import Any, Generic, List, Optional, Tuple, TypeVar, Union
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -53,15 +53,16 @@ class Picker(Generic[OPTION_T]):
 
 
     def parse_options(self) -> None:
-        if isinstance(self.options, dict):
-            options: List[Option] = []
-            for option, description in self.options.items():
-                if description == "":
-                    options.append(Option(option))
-                else:
-                    options.append(Option(option, description=description))
+        if not isinstance(self.options, dict):
+            return
 
-            self.options = options
+        options: List[Option] = []
+        for option, description in self.options.items():
+            if description == "":
+                options.append(Option(option))
+            else:
+                options.append(Option(option, description=description))
+        self.options = options
 
     def move_up(self) -> None:
         self.index -= 1
