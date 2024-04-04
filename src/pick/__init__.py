@@ -171,7 +171,7 @@ class Picker(Generic[OPTION_T]):
             description_lines = self.get_description_lines(option.description, max_x // 2)
 
             for i, line in enumerate(description_lines):
-                screen.addstr(i + 3, max_x // 2, line, 2 * max_x // 2 - 2)
+                screen.addnstr(i + 3, max_x // 2, line, 2 * max_x // 2 - 2)
 
         screen.refresh()
 
