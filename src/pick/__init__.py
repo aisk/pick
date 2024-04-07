@@ -25,7 +25,7 @@ PICK_RETURN_T = Tuple[OPTION_T, int]
 
 @dataclass
 class Picker(Generic[OPTION_T]):
-    options: Any
+    options: List[OPTION_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
@@ -36,8 +36,6 @@ class Picker(Generic[OPTION_T]):
     screen: Optional["curses._CursesWindow"] = None
 
     def __post_init__(self) -> None:
-        self.parse_options()
-
         if len(self.options) == 0:
             raise ValueError("options should not be an empty list")
 
@@ -50,19 +48,6 @@ class Picker(Generic[OPTION_T]):
             )
 
         self.index = self.default_index
-
-
-    def parse_options(self) -> None:
-        if not isinstance(self.options, dict):
-            return
-
-        options: List[Option] = []
-        for option, description in self.options.items():
-            if description == "":
-                options.append(Option(option))
-            else:
-                options.append(Option(option, description=description))
-        self.options = options
 
     def move_up(self) -> None:
         self.index -= 1
@@ -222,7 +207,7 @@ class Picker(Generic[OPTION_T]):
 
 
 def pick(
-    options: Any,
+    options: List[OPTION_T],
     title: Optional[str] = None,
     indicator: str = "*",
     default_index: int = 0,
