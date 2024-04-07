@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Any, Generic, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -25,7 +25,7 @@ PICK_RETURN_T = Tuple[OPTION_T, int]
 
 @dataclass
 class Picker(Generic[OPTION_T]):
-    options: List[OPTION_T]
+    options: Sequence[OPTION_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
@@ -207,7 +207,7 @@ class Picker(Generic[OPTION_T]):
 
 
 def pick(
-    options: List[OPTION_T],
+    options: Sequence[OPTION_T],
     title: Optional[str] = None,
     indicator: str = "*",
     default_index: int = 0,
