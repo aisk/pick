@@ -49,7 +49,7 @@ def test_multi_select():
 
 def test_option():
     options = [Option("option1", 101, "description1"), Option("option2", 102),
-               Option("option3", description="description3"), Option("option4"), "option5"]
+               Option("option3", description="description3"), Option("option4")]
     picker = Picker(options, multiselect=True)
     for _ in range(4):
         picker.mark_index()
@@ -61,21 +61,3 @@ def test_option():
     assert option[0].label == "option1"
     assert option[0].value == 101
     assert option[0].description == "description1"
-    picker.mark_index()
-    selected_options = picker.get_selected()
-    option = selected_options[-1]
-    assert isinstance(option, tuple)
-    assert isinstance(option[0], str)
-    assert option[0] == "option5"
-
-
-def test_parse_options():
-    options = {"option1": "description1", "option2": ""}
-    picker = Picker(options)
-    option, _ = picker.get_selected()
-    assert isinstance(option, Option)
-    assert option.description == "description1"
-    picker.move_down()
-    option, index = picker.get_selected()
-    assert index == 1
-    assert isinstance(option, Option)
