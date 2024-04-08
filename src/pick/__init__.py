@@ -20,7 +20,7 @@ KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
 
-OPTION_T = TypeVar('OPTION_T', str, Option)
+OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
 
 @dataclass
