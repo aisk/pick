@@ -147,8 +147,17 @@ class Picker(Generic[OPTION_T]):
 
         lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
+        description_present = False
+        for option in self.options:
+            if isinstance(option, str) or option.description is not None:
+                description_present = True
+                break
+
         for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x // 2 - 2)
+            if description_present:
+                screen.addnstr(y, x, line, max_x // 2 - 2)
+            else:
+                screen.addnstr(y, x, line, max_x - 2)
             y += 1
 
         option = self.options[self.index]
