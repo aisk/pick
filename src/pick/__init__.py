@@ -1,6 +1,6 @@
 import curses
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Sequence, Tuple, TypeVar, Union, Generic
+from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -8,7 +8,8 @@ __all__ = ["Picker", "pick", "Option"]
 @dataclass
 class Option:
     label: str
-    value: Any
+    value: Any = None
+    description: Optional[str] = None
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -21,7 +22,6 @@ SYMBOL_CIRCLE_EMPTY = "( )"
 
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
-
 
 @dataclass
 class Picker(Generic[OPTION_T]):
@@ -104,12 +104,31 @@ class Picker(Generic[OPTION_T]):
 
         return lines
 
-    def get_lines(self) -> Tuple[List, int]:
+    def get_lines(self) -> Tuple[List[str], int]:
         title_lines = self.get_title_lines()
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
+
+    def get_description_lines(self, description: str, length: int) -> List[str]:
+        description_words = description.split(" ")
+        description_lines: List[str] = []
+
+        line = ""
+        for i, word in enumerate(description_words):
+            if len(line + " " + word) <= length:
+                if i == 0:
+                    line += word
+                else:
+                    line += " " + word
+            else:
+                description_lines.append(line)
+                line = word
+
+        description_lines.append(line)
+
+        return description_lines
 
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
@@ -128,9 +147,25 @@ class Picker(Generic[OPTION_T]):
 
         lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
+        description_present = False
+        for option in self.options:
+            if isinstance(option, str) or option.description is not None:
+                description_present = True
+                break
+
         for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
+            if description_present:
+                screen.addnstr(y, x, line, max_x // 2 - 2)
+            else:
+                screen.addnstr(y, x, line, max_x - 2)
             y += 1
+
+        option = self.options[self.index]
+        if isinstance(option, Option) and option.description is not None:
+            description_lines = self.get_description_lines(option.description, max_x // 2)
+
+            for i, line in enumerate(description_lines):
+                screen.addnstr(i + 3, max_x // 2, line, 2 * max_x // 2 - 2)
 
         screen.refresh()
 
