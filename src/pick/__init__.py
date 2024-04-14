@@ -23,7 +23,7 @@ SYMBOL_CIRCLE_EMPTY = "( )"
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
 
-Position = namedtuple('Position', ['x', 'y'])
+Position = namedtuple('Position', ['y', 'x'])
 
 
 @dataclass
@@ -37,7 +37,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
-    position: Position = Position(1, 1)
+    position: Position = Position(0, 0)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -117,7 +117,7 @@ class Picker(Generic[OPTION_T]):
 
     def draw(self, screen: "curses._CursesWindow", position: Position) -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
-        x, y = position[0], position[1]  # start point
+        y, x = position  # start point
 
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
@@ -167,9 +167,9 @@ class Picker(Generic[OPTION_T]):
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
-    def _start(self, screen: "curses._CursesWindow", position: Position):
+    def _start(self, screen: "curses._CursesWindow"):
         self.config_curses()
-        return self.run_loop(screen, position)
+        return self.run_loop(screen, self.position)
 
     def start(self):
         if self.screen:
@@ -191,7 +191,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
-    position: Position = Position(1, 1)
+    position: Position = Position(0, 0)
 ):
     picker: Picker = Picker(
         options,
