@@ -136,7 +136,7 @@ class Picker(Generic[OPTION_T]):
 
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
-        y, x = position  # start point
+        y, x = self.position  # start point
 
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
@@ -176,7 +176,7 @@ class Picker(Generic[OPTION_T]):
         self, screen: "curses._CursesWindow", position: Position
     ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
-            self.draw(screen, position)
+            self.draw(screen)
             c = screen.getch()
             if c in KEYS_UP:
                 self.move_up()
