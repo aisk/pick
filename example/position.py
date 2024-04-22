@@ -15,7 +15,7 @@ def main(stdscr):
         indicator="=>",
         default_index=2,
         screen=stdscr,
-        position=pick.Position(y, 0)  # comment this to demonstrate the issue it solves
+        position=pick.Position(y=y, x=0)  # comment this to demonstrate the issue it solves
     )
 
     stdscr.addstr(f"\nYou choosed {option} at index {index}\n")
