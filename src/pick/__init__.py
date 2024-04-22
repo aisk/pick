@@ -1,4 +1,5 @@
 import curses
+from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
 
@@ -23,6 +24,8 @@ SYMBOL_CIRCLE_EMPTY = "( )"
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
 
+Position = namedtuple('Position', ['y', 'x'])
+
 @dataclass
 class Picker(Generic[OPTION_T]):
     options: Sequence[OPTION_T]
@@ -34,6 +37,7 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
+    position: Position = Position(0, 0)
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -132,9 +136,8 @@ class Picker(Generic[OPTION_T]):
 
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
-        screen.clear()
+        y, x = self.position  # start point
 
-        x, y = 1, 1  # start point
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
 
@@ -170,7 +173,7 @@ class Picker(Generic[OPTION_T]):
         screen.refresh()
 
     def run_loop(
-        self, screen: "curses._CursesWindow"
+        self, screen: "curses._CursesWindow", position: Position
     ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
             self.draw(screen)
@@ -201,14 +204,14 @@ class Picker(Generic[OPTION_T]):
 
     def _start(self, screen: "curses._CursesWindow"):
         self.config_curses()
-        return self.run_loop(screen)
+        return self.run_loop(screen, self.position)
 
     def start(self):
         if self.screen:
             # Given an existing screen
             # don't make any lasting changes
             last_cur = curses.curs_set(0)
-            ret = self.run_loop(self.screen)
+            ret = self.run_loop(self.screen, self.position)
             if last_cur:
                 curses.curs_set(last_cur)
             return ret
@@ -223,6 +226,7 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
+    position: Position = Position(0, 0)
 ):
     picker: Picker = Picker(
         options,
@@ -232,5 +236,6 @@ def pick(
         multiselect,
         min_selection_count,
         screen,
+        position,
     )
     return picker.start()
