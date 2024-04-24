@@ -38,7 +38,7 @@ def test_no_title():
 def test_pick_list_of_non_str_and_option():
     # More details: https://github.com/aisk/pick/issues/120
     options = [{"key1": "value1"}, {"key2", "value2"}]
-    picker = Picker(options)
+    picker = Picker(options)  # type: ignore
     lines, _ = picker.get_lines()
     assert lines == ["* {'key1': 'value1'}", "  {'key2', 'value2'}"]
 
