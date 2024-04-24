@@ -31,8 +31,16 @@ def test_get_lines():
 def test_no_title():
     options = ["option1", "option2", "option3"]
     picker = Picker(options)
-    lines, current_line = picker.get_lines()
+    _, current_line = picker.get_lines()
     assert current_line == 1
+
+
+def test_pick_list_of_non_str_and_option():
+    # More details: https://github.com/aisk/pick/issues/120
+    options = [{"key1": "value1"}, {"key2", "value2"}]
+    picker = Picker(options)
+    lines, _ = picker.get_lines()
+    assert lines == ["* {'key1': 'value1'}", "  {'key2', 'value2'}"]
 
 
 def test_multi_select():
