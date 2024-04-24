@@ -152,7 +152,7 @@ class Picker(Generic[OPTION_T]):
 
         description_present = False
         for option in self.options:
-            if isinstance(option, str) or option.description is not None:
+            if not isinstance(option, Option) or option.description is not None:
                 description_present = True
                 break
 
