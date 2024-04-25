@@ -38,6 +38,7 @@ class Picker(Generic[OPTION_T]):
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
     position: Position = Position(0, 0)
+    clear_screen: bool = True
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -136,6 +137,9 @@ class Picker(Generic[OPTION_T]):
 
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
+        if self.clear_screen:
+            screen.clear()
+
         y, x = self.position  # start point
 
         max_y, max_x = screen.getmaxyx()
@@ -226,7 +230,8 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
-    position: Position = Position(0, 0)
+    position: Position = Position(0, 0),
+    clear_screen = True,
 ):
     picker: Picker = Picker(
         options,
@@ -237,5 +242,6 @@ def pick(
         min_selection_count,
         screen,
         position,
+        clear_screen,
     )
     return picker.start()
