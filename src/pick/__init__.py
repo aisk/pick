@@ -13,6 +13,9 @@ class Option:
     description: Optional[str] = None
 
 
+KEY_CTRL_C = 3
+KEY_ESCAPE = 27
+KEYS_QUIT = (KEY_CTRL_C, KEY_ESCAPE, ord("q"))
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
 KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
@@ -24,7 +27,8 @@ SYMBOL_CIRCLE_EMPTY = "( )"
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
 
-Position = namedtuple('Position', ['y', 'x'])
+Position = namedtuple("Position", ["y", "x"])
+
 
 @dataclass
 class Picker(Generic[OPTION_T]):
@@ -169,7 +173,9 @@ class Picker(Generic[OPTION_T]):
 
         option = self.options[self.index]
         if isinstance(option, Option) and option.description is not None:
-            description_lines = self.get_description_lines(option.description, max_x // 2)
+            description_lines = self.get_description_lines(
+                option.description, max_x // 2
+            )
 
             for i, line in enumerate(description_lines):
                 screen.addnstr(i + 3, max_x // 2, line, 2 * max_x // 2 - 2)
@@ -182,7 +188,9 @@ class Picker(Generic[OPTION_T]):
         while True:
             self.draw(screen)
             c = screen.getch()
-            if c in KEYS_UP:
+            if c in KEYS_QUIT:
+                return None, None
+            elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
                 self.move_down()
@@ -231,7 +239,7 @@ def pick(
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
     position: Position = Position(0, 0),
-    clear_screen = True,
+    clear_screen: bool = True,
 ):
     picker: Picker = Picker(
         options,
