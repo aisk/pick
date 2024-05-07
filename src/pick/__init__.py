@@ -189,7 +189,7 @@ class Picker(Generic[OPTION_T]):
             self.draw(screen)
             c = screen.getch()
             if c in KEYS_QUIT:
-                return None, None
+                return None, -1
             elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
