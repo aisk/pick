@@ -27,8 +27,7 @@ SYMBOL_CIRCLE_EMPTY = "( )"
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
 
-Position = namedtuple("Position", ["y", "x"])
-
+Position = namedtuple('Position', ['y', 'x'])
 
 @dataclass
 class Picker(Generic[OPTION_T]):
@@ -173,9 +172,7 @@ class Picker(Generic[OPTION_T]):
 
         option = self.options[self.index]
         if isinstance(option, Option) and option.description is not None:
-            description_lines = self.get_description_lines(
-                option.description, max_x // 2
-            )
+            description_lines = self.get_description_lines(option.description, max_x // 2)
 
             for i, line in enumerate(description_lines):
                 screen.addnstr(i + 3, max_x // 2, line, 2 * max_x // 2 - 2)
