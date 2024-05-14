@@ -1,4 +1,5 @@
 import curses
+from textwrap import fill
 from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
@@ -116,25 +117,6 @@ class Picker(Generic[OPTION_T]):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def get_description_lines(self, description: str, length: int) -> List[str]:
-        description_words = description.split(" ")
-        description_lines: List[str] = []
-
-        line = ""
-        for i, word in enumerate(description_words):
-            if len(line + " " + word) <= length:
-                if i == 0:
-                    line += word
-                else:
-                    line += " " + word
-            else:
-                description_lines.append(line)
-                line = word
-
-        description_lines.append(line)
-
-        return description_lines
-
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
         if self.clear_screen:
@@ -169,10 +151,10 @@ class Picker(Generic[OPTION_T]):
 
         option = self.options[self.index]
         if isinstance(option, Option) and option.description is not None:
-            description_lines = self.get_description_lines(option.description, max_x // 2)
+            description_lines = fill(option.description, max_x // 2 - 2).split('\n')
 
             for i, line in enumerate(description_lines):
-                screen.addnstr(i + 3, max_x // 2, line, 2 * max_x // 2 - 2)
+                screen.addnstr(i + 3, max_x // 2, line, max_x - 2)
 
         screen.refresh()
 
