@@ -1,5 +1,5 @@
 import curses
-from textwrap import fill
+import textwrap
 from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
@@ -151,7 +151,7 @@ class Picker(Generic[OPTION_T]):
 
         option = self.options[self.index]
         if isinstance(option, Option) and option.description is not None:
-            description_lines = fill(option.description, max_x // 2 - 2).split('\n')
+            description_lines = textwrap.fill(option.description, max_x // 2 - 2).split('\n')
 
             for i, line in enumerate(description_lines):
                 screen.addnstr(i + 3, max_x // 2, line, max_x - 2)
