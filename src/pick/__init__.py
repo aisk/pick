@@ -84,9 +84,9 @@ class Picker(Generic[OPTION_T]):
         else:
             return self.options[self.index], self.index
 
-    def get_title_lines(self) -> List[str]:
+    def get_title_lines(self, max_x: int) -> List[str]:
         if self.title:
-            return self.title.split("\n") + [""]
+            return textwrap.fill(self.title, max_x - 2, drop_whitespace=False).split("\n") + [""]
         return []
 
     def get_option_lines(self) -> List[str]:
@@ -110,8 +110,8 @@ class Picker(Generic[OPTION_T]):
 
         return lines
 
-    def get_lines(self) -> Tuple[List[str], int]:
-        title_lines = self.get_title_lines()
+    def get_lines(self, max_x: int = 80) -> Tuple[List[str], int]:
+        title_lines = self.get_title_lines(max_x)
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
@@ -127,7 +127,7 @@ class Picker(Generic[OPTION_T]):
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
 
-        lines, current_line = self.get_lines()
+        lines, current_line = self.get_lines(max_x)
 
         # calculate how many lines we should scroll, relative to the top
         scroll_top = 0
@@ -138,12 +138,12 @@ class Picker(Generic[OPTION_T]):
 
         description_present = False
         for option in self.options:
-            if not isinstance(option, Option) or option.description is not None:
+            if isinstance(option, Option) and option.description is not None:
                 description_present = True
                 break
 
-        for line in lines_to_draw:
-            if description_present:
+        for i, line in enumerate(lines_to_draw):
+            if description_present and i > len(self.get_title_lines(max_x)):
                 screen.addnstr(y, x, line, max_x // 2 - 2)
             else:
                 screen.addnstr(y, x, line, max_x - 2)
