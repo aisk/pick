@@ -14,10 +14,15 @@ class Option:
     description: Optional[str] = None
 
 
+GITBASH_KEY_UP = 450
+GITBASH_KEY_DOWN = 456
+KEY_ESCAPE = 27
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
-KEYS_UP = (curses.KEY_UP, ord("k"))
-KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
+KEYS_UP = (curses.KEY_UP, ord("k"), GITBASH_KEY_UP)
+KEYS_DOWN = (curses.KEY_DOWN, ord("j"), GITBASH_KEY_DOWN)
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
+KEYS_QUIT = (ord("q"), KEY_ESCAPE)
+
 
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
@@ -166,7 +171,9 @@ class Picker(Generic[OPTION_T]):
         while True:
             self.draw(screen)
             c = screen.getch()
-            if c in KEYS_UP:
+            if c in KEYS_QUIT:
+                return None, None
+            elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
                 self.move_down()
