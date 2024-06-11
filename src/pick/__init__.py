@@ -13,9 +13,6 @@ class Option:
     description: Optional[str] = None
 
 
-KEY_CTRL_C = 3
-KEY_ESCAPE = 27
-KEYS_QUIT = (KEY_CTRL_C, KEY_ESCAPE, ord("q"))
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
 KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
@@ -42,6 +39,7 @@ class Picker(Generic[OPTION_T]):
     screen: Optional["curses._CursesWindow"] = None
     position: Position = Position(0, 0)
     clear_screen: bool = True
+    keys_quit: Optional[tuple[int]] = None
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -185,8 +183,11 @@ class Picker(Generic[OPTION_T]):
         while True:
             self.draw(screen)
             c = screen.getch()
-            if c in KEYS_QUIT:
-                return None, -1
+            if self.keys_quit is not None and c in self.keys_quit:
+                if self.multiselect:
+                    return []
+                else:
+                    return None, -1
             elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
@@ -237,6 +238,7 @@ def pick(
     screen: Optional["curses._CursesWindow"] = None,
     position: Position = Position(0, 0),
     clear_screen: bool = True,
+    keys_quit: Optional[tuple[int]] = None,
 ):
     picker: Picker = Picker(
         options,
@@ -248,5 +250,6 @@ def pick(
         screen,
         position,
         clear_screen,
+        keys_quit,
     )
     return picker.start()
