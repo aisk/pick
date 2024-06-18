@@ -39,7 +39,7 @@ class Picker(Generic[OPTION_T]):
     screen: Optional["curses._CursesWindow"] = None
     position: Position = Position(0, 0)
     clear_screen: bool = True
-    keys_quit: Optional[tuple[int]] = None
+    keys_quit: Optional[Tuple[int]] = None
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
