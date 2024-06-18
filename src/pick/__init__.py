@@ -238,7 +238,7 @@ def pick(
     screen: Optional["curses._CursesWindow"] = None,
     position: Position = Position(0, 0),
     clear_screen: bool = True,
-    keys_quit: Optional[tuple[int]] = None,
+    keys_quit: Optional[Tuple[int]] = None,
 ):
     picker: Picker = Picker(
         options,
