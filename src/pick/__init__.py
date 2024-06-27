@@ -1,7 +1,7 @@
 import curses
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -39,7 +39,7 @@ class Picker(Generic[OPTION_T]):
     screen: Optional["curses._CursesWindow"] = None
     position: Position = Position(0, 0)
     clear_screen: bool = True
-    keys_quit: Optional[Tuple[int]] = None
+    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -183,7 +183,7 @@ class Picker(Generic[OPTION_T]):
         while True:
             self.draw(screen)
             c = screen.getch()
-            if self.keys_quit is not None and c in self.keys_quit:
+            if self.quit_keys is not None and c in self.quit_keys:
                 if self.multiselect:
                     return []
                 else:
@@ -238,7 +238,7 @@ def pick(
     screen: Optional["curses._CursesWindow"] = None,
     position: Position = Position(0, 0),
     clear_screen: bool = True,
-    keys_quit: Optional[Tuple[int]] = None,
+    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
 ):
     picker: Picker = Picker(
         options,
@@ -250,6 +250,6 @@ def pick(
         screen,
         position,
         clear_screen,
-        keys_quit,
+        quit_keys,
     )
     return picker.start()
