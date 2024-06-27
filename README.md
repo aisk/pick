@@ -59,7 +59,7 @@ interactive selection list in the terminal.
 - `screen`: (optional), if you are using `pick` within an existing curses application set this to your existing `screen` object. It is assumed this has initialised in the standard way (e.g. via `curses.wrapper()`, or `curses.noecho(); curses.cbreak(); screen.kepad(True)`)
 - `position`: (optional), if you are using `pick` within an existing curses application use this to set the first position to write to. e.g., `position=pick.Position(y=1, x=1)`
 - `quit_keys`: (optional), if you want to quit early, you can pass a key codes.
-  If the corresponding key are pressed, it will quit the menu
+  If the corresponding key are pressed, it will quit the menu.
 
 ## Community Projects
 
