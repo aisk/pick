@@ -31,8 +31,16 @@ def test_get_lines():
 def test_no_title():
     options = ["option1", "option2", "option3"]
     picker = Picker(options)
-    lines, current_line = picker.get_lines()
+    _, current_line = picker.get_lines()
     assert current_line == 1
+
+
+def test_pick_list_of_non_str_and_option():
+    # More details: https://github.com/aisk/pick/issues/120
+    options = [{"key1": "value1"}, {"key2": "value2"}]
+    picker = Picker(options)  # type: ignore
+    lines, _ = picker.get_lines()
+    assert lines == ["* {'key1': 'value1'}", "  {'key2': 'value2'}"]
 
 
 def test_multi_select():
@@ -48,10 +56,16 @@ def test_multi_select():
 
 
 def test_option():
-    options = [Option("option1", 101), Option("option2", 102), Option("option3", 103)]
-    picker = Picker(options)
-    picker.move_down()
-    option, index = picker.get_selected()
-    assert index == 1
-    assert isinstance(option, Option)
-    assert option.value == 102
+    options = [Option("option1", 101, "description1"), Option("option2", 102),
+               Option("option3", description="description3"), Option("option4")]
+    picker = Picker(options, multiselect=True)
+    for _ in range(4):
+        picker.mark_index()
+        picker.move_down()
+    selected_options = picker.get_selected()
+    for option in selected_options:
+        assert isinstance(option[0], Option)
+    option = selected_options[0]
+    assert option[0].label == "option1"
+    assert option[0].value == 101
+    assert option[0].description == "description1"

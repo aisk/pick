@@ -1,6 +1,8 @@
 import curses
+import textwrap
+from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Sequence, Tuple, TypeVar, Union, Generic
+from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
 __all__ = ["Picker", "pick", "Option"]
 
@@ -10,6 +12,7 @@ class Option:
     label: str
     value: Any
     enable: bool = True
+    description: Optional[str] = None
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -23,6 +26,7 @@ SYMBOL_CIRCLE_EMPTY = "( )"
 OPTION_T = TypeVar("OPTION_T", str, Option)
 PICK_RETURN_T = Tuple[OPTION_T, int]
 
+Position = namedtuple('Position', ['y', 'x'])
 
 @dataclass
 class Picker(Generic[OPTION_T]):
@@ -35,6 +39,9 @@ class Picker(Generic[OPTION_T]):
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
+    position: Position = Position(0, 0)
+    clear_screen: bool = True
+    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -85,9 +92,9 @@ class Picker(Generic[OPTION_T]):
         else:
             return self.options[self.index], self.index
 
-    def get_title_lines(self) -> List[str]:
+    def get_title_lines(self, *, max_width: int = 80) -> List[str]:
         if self.title:
-            return self.title.split("\n") + [""]
+            return textwrap.fill(self.title, max_width - 2, drop_whitespace=False).split("\n") + [""]
         return []
 
     def get_option_lines(self) -> List[str]:
@@ -111,8 +118,8 @@ class Picker(Generic[OPTION_T]):
 
         return lines
 
-    def get_lines(self) -> Tuple[List, int]:
-        title_lines = self.get_title_lines()
+    def get_lines(self, *, max_width: int = 80) -> Tuple[List[str], int]:
+        title_lines = self.get_title_lines(max_width=max_width)
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
@@ -120,13 +127,15 @@ class Picker(Generic[OPTION_T]):
 
     def draw(self, screen: "curses._CursesWindow") -> None:
         """draw the curses ui on the screen, handle scroll if needed"""
-        screen.clear()
+        if self.clear_screen:
+            screen.clear()
 
-        x, y = 1, 1  # start point
+        y, x = self.position  # start point
+
         max_y, max_x = screen.getmaxyx()
         max_rows = max_y - y  # the max rows we can draw
 
-        lines, current_line = self.get_lines()
+        lines, current_line = self.get_lines(max_width=max_x)
 
         # calculate how many lines we should scroll, relative to the top
         scroll_top = 0
@@ -135,19 +144,42 @@ class Picker(Generic[OPTION_T]):
 
         lines_to_draw = lines[scroll_top: scroll_top + max_rows]
 
-        for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
+        description_present = False
+        for option in self.options:
+            if isinstance(option, Option) and option.description is not None:
+                description_present = True
+                break
+
+        title_length = len(self.get_title_lines(max_width=max_x))
+
+        for i, line in enumerate(lines_to_draw):
+            if description_present and i > title_length:
+                screen.addnstr(y, x, line, max_x // 2 - 2)
+            else:
+                screen.addnstr(y, x, line, max_x - 2)
             y += 1
+
+        option = self.options[self.index]
+        if isinstance(option, Option) and option.description is not None:
+            description_lines = textwrap.fill(option.description, max_x // 2 - 2).split('\n')
+
+            for i, line in enumerate(description_lines):
+                screen.addnstr(i + title_length, max_x // 2, line, max_x - 2)
 
         screen.refresh()
 
     def run_loop(
-        self, screen: "curses._CursesWindow"
+        self, screen: "curses._CursesWindow", position: Position
     ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
             self.draw(screen)
             c = screen.getch()
-            if c in KEYS_UP:
+            if self.quit_keys is not None and c in self.quit_keys:
+                if self.multiselect:
+                    return []
+                else:
+                    return None, -1
+            elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
                 self.move_down()
@@ -173,14 +205,14 @@ class Picker(Generic[OPTION_T]):
 
     def _start(self, screen: "curses._CursesWindow"):
         self.config_curses()
-        return self.run_loop(screen)
+        return self.run_loop(screen, self.position)
 
     def start(self):
         if self.screen:
             # Given an existing screen
             # don't make any lasting changes
             last_cur = curses.curs_set(0)
-            ret = self.run_loop(self.screen)
+            ret = self.run_loop(self.screen, self.position)
             if last_cur:
                 curses.curs_set(last_cur)
             return ret
@@ -195,6 +227,9 @@ def pick(
     multiselect: bool = False,
     min_selection_count: int = 0,
     screen: Optional["curses._CursesWindow"] = None,
+    position: Position = Position(0, 0),
+    clear_screen: bool = True,
+    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
 ):
     picker: Picker = Picker(
         options,
@@ -204,5 +239,8 @@ def pick(
         multiselect,
         min_selection_count,
         screen,
+        position,
+        clear_screen,
+        quit_keys,
     )
     return picker.start()

@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "pick"
-version = "2.2.0"
+version = "2.4.0b1"
 description = "Pick an option in the terminal with a simple GUI"
-authors = ["wong2 <wonderfuly@gmail.com>"]
+authors = ["wong2 <wonderfuly@gmail.com>", "AN Long <aisk1988@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/wong2/pick"
-homepage = "https://github.com/wong2/pick"
+repository = "https://github.com/aisk/pick"
+homepage = "https://github.com/aisk/pick"
 keywords = ["terminal", "gui"]
 
 [tool.poetry.dependencies]
@@ -14,8 +14,8 @@ python = ">=3.7"
 windows-curses = {version = "^2.2.0", platform = "win32"}
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.1.3"
-mypy = "^0.991"
+pytest = "^7.2.0"
+mypy = "^1.4"
 pre-commit = "^2.20.0"
 
 [build-system]
