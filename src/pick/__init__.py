@@ -10,7 +10,7 @@ __all__ = ["Picker", "pick", "Option"]
 @dataclass
 class Option:
     label: str
-    value: Any
+    value: Any = None
     enable: bool = True
     description: Optional[str] = None
 
@@ -142,7 +142,7 @@ class Picker(Generic[OPTION_T]):
         if current_line > max_rows:
             scroll_top = current_line - max_rows
 
-        lines_to_draw = lines[scroll_top: scroll_top + max_rows]
+        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
 
         description_present = False
         for option in self.options:
