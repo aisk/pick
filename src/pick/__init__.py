@@ -9,6 +9,7 @@ __all__ = ["Picker", "pick", "Option"]
 class Option:
     label: str
     value: Any
+    enable: bool = True
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -32,7 +33,6 @@ class Picker(Generic[OPTION_T]):
     multiselect: bool = False
     min_selection_count: int = 0
     selected_indexes: List[int] = field(init=False, default_factory=list)
-    excluded_indexes: List[int] = field(default_factory=list)
     index: int = field(init=False, default=0)
     screen: Optional["curses._CursesWindow"] = None
 
@@ -52,22 +52,19 @@ class Picker(Generic[OPTION_T]):
         while self.index in self.excluded_indexes:
             self.index += 1
 
-    
     def move_up(self) -> None:
         self.index -= 1
-
-        while self.index in self.excluded_indexes:
-            self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
+        if isinstance(self.options[self.index], Option) and not self.options[self.index].enable:
+            self.index -= 1
 
     def move_down(self) -> None:
         self.index += 1
-
-        while self.index in self.excluded_indexes:
-            self.index += 1
         if self.index >= len(self.options):
             self.index = 0
+        if isinstance(self.options[self.index], Option) and not self.options[self.index].enable:
+            self.index += 1
 
     def mark_index(self) -> None:
         if self.multiselect:
@@ -197,12 +194,8 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    excluded_indexes = None,
     screen: Optional["curses._CursesWindow"] = None,
 ):
-    if excluded_indexes is None:
-        excluded_indexes = []
-    
     picker: Picker = Picker(
         options,
         title,
@@ -210,7 +203,6 @@ def pick(
         default_index,
         multiselect,
         min_selection_count,
-        excluded_indexes,
         screen,
     )
     return picker.start()
