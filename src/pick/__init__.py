@@ -11,8 +11,8 @@ __all__ = ["Picker", "pick", "Option"]
 class Option:
     label: str
     value: Any = None
-    enable: bool = True
     description: Optional[str] = None
+    enable: bool = True
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -56,21 +56,21 @@ class Picker(Generic[OPTION_T]):
             )
 
         self.index = self.default_index
-        while self.index in self.excluded_indexes:
-            self.index += 1
 
     def move_up(self) -> None:
         self.index -= 1
         if self.index < 0:
             self.index = len(self.options) - 1
-        if isinstance(self.options[self.index], Option) and not self.options[self.index].enable:
+        option = self.options[self.index]
+        if isinstance(option, Option) and not option.enable:
             self.index -= 1
 
     def move_down(self) -> None:
         self.index += 1
         if self.index >= len(self.options):
             self.index = 0
-        if isinstance(self.options[self.index], Option) and not self.options[self.index].enable:
+        option = self.options[self.index]
+        if isinstance(option, Option) and not option.enable:
             self.index += 1
 
     def mark_index(self) -> None:
