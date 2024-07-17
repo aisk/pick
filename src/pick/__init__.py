@@ -55,7 +55,15 @@ class Picker(Generic[OPTION_T]):
                 "min_selection_count is bigger than the available options, you will not be able to make any selection"
             )
 
+        if all(isinstance(option, Option) and option.enabled == False for option in self.options):
+            raise NotImplementedError(
+                "all given options are disabled, you must at least have one enabled option."
+            )
+
         self.index = self.default_index
+        option = self.options[self.index]
+        if isinstance(option, Option) and not option.enabled:
+            self.move_down()
 
     def move_up(self) -> None:
         while True:
