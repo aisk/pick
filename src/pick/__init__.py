@@ -58,20 +58,22 @@ class Picker(Generic[OPTION_T]):
         self.index = self.default_index
 
     def move_up(self) -> None:
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.options) - 1
-        option = self.options[self.index]
-        if isinstance(option, Option) and not option.enabled:
+        while True:
             self.index -= 1
+            if self.index < 0:
+                self.index = len(self.options) - 1
+            option = self.options[self.index]
+            if not isinstance(option, Option) or option.enabled:
+                break
 
     def move_down(self) -> None:
-        self.index += 1
-        if self.index >= len(self.options):
-            self.index = 0
-        option = self.options[self.index]
-        if isinstance(option, Option) and not option.enabled:
+        while True:
             self.index += 1
+            if self.index >= len(self.options):
+                self.index = 0
+            option = self.options[self.index]
+            if not isinstance(option, Option) or option.enabled:
+                break
 
     def mark_index(self) -> None:
         if self.multiselect:
