@@ -62,7 +62,7 @@ class Picker(Generic[OPTION_T]):
         if self.index < 0:
             self.index = len(self.options) - 1
         option = self.options[self.index]
-        if isinstance(option, Option) and not option.enable:
+        if isinstance(option, Option) and not option.enabled:
             self.index -= 1
 
     def move_down(self) -> None:
@@ -70,7 +70,7 @@ class Picker(Generic[OPTION_T]):
         if self.index >= len(self.options):
             self.index = 0
         option = self.options[self.index]
-        if isinstance(option, Option) and not option.enable:
+        if isinstance(option, Option) and not option.enabled:
             self.index += 1
 
     def mark_index(self) -> None:
