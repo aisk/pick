@@ -12,7 +12,7 @@ class Option:
     label: str
     value: Any = None
     description: Optional[str] = None
-    enable: bool = True
+    enabled: bool = True
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
