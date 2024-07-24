@@ -56,7 +56,7 @@ class Picker(Generic[OPTION_T]):
             )
 
         if all(isinstance(option, Option) and option.enabled == False for option in self.options):
-            raise NotImplementedError(
+            raise ValueError(
                 "all given options are disabled, you must at least have one enabled option."
             )
 
