@@ -1,5 +1,6 @@
 from pick import pick, Option
 
+
 title = "Please choose an option: "
 options = [
     Option("Option 1", description="All options are `enabled` by default."),
