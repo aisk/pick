@@ -69,3 +69,10 @@ def test_option():
     assert option[0].label == "option1"
     assert option[0].value == 101
     assert option[0].description == "description1"
+
+def test_disabled_option():
+    options = [Option("option1"), Option("option2", enabled=False), Option("option3")]
+    picker = Picker(options)
+    assert picker.get_selected() == (Option("option1"), 0)
+    picker.move_down()
+    assert picker.get_selected() == (Option("option3"), 2)

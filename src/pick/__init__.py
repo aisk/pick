@@ -12,6 +12,7 @@ class Option:
     label: str
     value: Any = None
     description: Optional[str] = None
+    enabled: bool = True
 
 
 KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
@@ -54,17 +55,33 @@ class Picker(Generic[OPTION_T]):
                 "min_selection_count is bigger than the available options, you will not be able to make any selection"
             )
 
+        if all(isinstance(option, Option) and not option.enabled for option in self.options):
+            raise ValueError(
+                "all given options are disabled, you must at least have one enabled option."
+            )
+
         self.index = self.default_index
+        option = self.options[self.index]
+        if isinstance(option, Option) and not option.enabled:
+            self.move_down()
 
     def move_up(self) -> None:
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.options) - 1
+        while True:
+            self.index -= 1
+            if self.index < 0:
+                self.index = len(self.options) - 1
+            option = self.options[self.index]
+            if not isinstance(option, Option) or option.enabled:
+                break
 
     def move_down(self) -> None:
-        self.index += 1
-        if self.index >= len(self.options):
-            self.index = 0
+        while True:
+            self.index += 1
+            if self.index >= len(self.options):
+                self.index = 0
+            option = self.options[self.index]
+            if not isinstance(option, Option) or option.enabled:
+                break
 
     def mark_index(self) -> None:
         if self.multiselect:
