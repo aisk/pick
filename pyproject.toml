@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pick"
-version = "2.4.0b1"
+version = "2.4.0"
 description = "Pick an option in the terminal with a simple GUI"
 authors = ["wong2 <wonderfuly@gmail.com>", "AN Long <aisk1988@gmail.com>"]
 license = "MIT"
