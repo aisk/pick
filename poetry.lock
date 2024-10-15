@@ -460,25 +460,25 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 
 [[package]]
 name = "windows-curses"
-version = "2.3.3"
+version = "2.4.0"
 description = "Support for the standard curses module on Windows"
 optional = false
 python-versions = "*"
 files = [
-    {file = "windows_curses-2.3.3-cp310-cp310-win32.whl", hash = "sha256:859011e77d7d9d9eaabb4fe081760cec966454bdea18a9f3a98e6d10e802fb61"},
-    {file = "windows_curses-2.3.3-cp310-cp310-win_amd64.whl", hash = "sha256:cb0eaf41b90c0b7e33269a6cf34900d8b0d7f3fcf2c1f9dd8191bac11955b711"},
-    {file = "windows_curses-2.3.3-cp311-cp311-win32.whl", hash = "sha256:3b3d01720724532794e81f0496d18c1284791b6e5b1fa7a59ec878d1c5134dde"},
-    {file = "windows_curses-2.3.3-cp311-cp311-win_amd64.whl", hash = "sha256:a5d90950656fc0d85aa3d395ec7f454cc7136add512d40a9c5e8ff29a0ce4905"},
-    {file = "windows_curses-2.3.3-cp312-cp312-win32.whl", hash = "sha256:e24b68a1c029d3ff521cf9325ba0f533b303e22ed148952a5a5e6396f29f536c"},
-    {file = "windows_curses-2.3.3-cp312-cp312-win_amd64.whl", hash = "sha256:eaea51f169d9940a9bad1edda1759f63795daeb2174b2a45c895148058970689"},
-    {file = "windows_curses-2.3.3-cp36-cp36m-win32.whl", hash = "sha256:0d7fb1d799ce3458c9e7215ffa2e8c5e347dabeef1227350b62db6030ebd4c24"},
-    {file = "windows_curses-2.3.3-cp36-cp36m-win_amd64.whl", hash = "sha256:1db4246cc019d31614d29e0a26bb8792b0a1a9ba4fbb82ceaf85e5607c7a2857"},
-    {file = "windows_curses-2.3.3-cp37-cp37m-win32.whl", hash = "sha256:cb654716c400b24c6410e09415ea682307cf874ee76b109d9c6587a42ac7ed62"},
-    {file = "windows_curses-2.3.3-cp37-cp37m-win_amd64.whl", hash = "sha256:ba4a6a0d2d56ad834a1241fb5ce83186322cca87295ef4a768ede870ad33d597"},
-    {file = "windows_curses-2.3.3-cp38-cp38-win32.whl", hash = "sha256:a3604136cc0284e2284c7172bb81ba6ff914f820c2eb156e5dde71dafd98fff9"},
-    {file = "windows_curses-2.3.3-cp38-cp38-win_amd64.whl", hash = "sha256:15d148658e8967fd3826c907c4ad094d35a7a3605eb0e2d1bbad0b5c81b9df9f"},
-    {file = "windows_curses-2.3.3-cp39-cp39-win32.whl", hash = "sha256:b61d1d949b508de4e73e8b4848e243c5d9de691c242b2c8d458a991e5e80ad18"},
-    {file = "windows_curses-2.3.3-cp39-cp39-win_amd64.whl", hash = "sha256:23b71f3a44cc5a5b92e12d3a519e840e54f8252ff3ef867b630963d5fe7124dd"},
+    {file = "windows_curses-2.4.0-cp310-cp310-win32.whl", hash = "sha256:525fa12689aa54cd8e4cfa6d03f3d4d336f2e9ef0b6db4fdb4d3c1b22a71180b"},
+    {file = "windows_curses-2.4.0-cp310-cp310-win_amd64.whl", hash = "sha256:4621042a28f48e2240314a624eb36f18121483d47f12c488cad9670f402ba6d7"},
+    {file = "windows_curses-2.4.0-cp311-cp311-win32.whl", hash = "sha256:90fde3341b2361f45716cfbe44bd253ac6a07dfde7262f3afdcf7cc0285c35ac"},
+    {file = "windows_curses-2.4.0-cp311-cp311-win_amd64.whl", hash = "sha256:0c32be4aa97887febff175a8a6b3deeecc06c1a3f47ecbb5f62de6bf4165d6db"},
+    {file = "windows_curses-2.4.0-cp312-cp312-win32.whl", hash = "sha256:e165db84de30039f6da6bded9aa2f88e3c1ae7be11dc7c84416cbe6ba0ac4f29"},
+    {file = "windows_curses-2.4.0-cp312-cp312-win_amd64.whl", hash = "sha256:f50d02833a7e7866b9f42d62febbdf83c6703575240e9bbdd1446d09d70505d3"},
+    {file = "windows_curses-2.4.0-cp36-cp36m-win32.whl", hash = "sha256:fcb0591fc6e647556f685327a6f3e6923afc8a16c35436665df692556b78e708"},
+    {file = "windows_curses-2.4.0-cp36-cp36m-win_amd64.whl", hash = "sha256:e1f137d347e300e6163fa0aa31f7a02f6da42e43a90ce423bc929fb06752385e"},
+    {file = "windows_curses-2.4.0-cp37-cp37m-win32.whl", hash = "sha256:6771fb73f5a66d281a6f5e474dcfe07a4dd64460ff17c72ed9dd35fdf65fbfc8"},
+    {file = "windows_curses-2.4.0-cp37-cp37m-win_amd64.whl", hash = "sha256:68d633cdb7e82ec207184ab3be74c058e184cd34f76407801cf451be4ee85861"},
+    {file = "windows_curses-2.4.0-cp38-cp38-win32.whl", hash = "sha256:342b786c82fda5f9592593b2f8f4078de40b31baaf331be57af4c3c9a2e40061"},
+    {file = "windows_curses-2.4.0-cp38-cp38-win_amd64.whl", hash = "sha256:c77973c5af419c3d9bcb99908dc9791102813026d6abdda9236e44d9342c9579"},
+    {file = "windows_curses-2.4.0-cp39-cp39-win32.whl", hash = "sha256:6f481322360dbcdfa37b30654c89aa2920f4528eaefec3a50fa6a6d07be49069"},
+    {file = "windows_curses-2.4.0-cp39-cp39-win_amd64.whl", hash = "sha256:441189fb71c455ed0575ffb1b840d5857c01c4dda441cbbbd34a6216e7207bfa"},
 ]
 
 [[package]]
