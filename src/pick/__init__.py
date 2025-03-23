@@ -209,7 +209,7 @@ class Picker(Generic[OPTION_T]):
             curses.use_default_colors()
             # hide the cursor
             curses.curs_set(0)
-        except:
+        except Exception:
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
