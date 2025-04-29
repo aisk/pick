@@ -295,6 +295,7 @@ class Picker:
         return self.get_selected()
 
     def _display_screen(self) -> None:
+        self.term = cast(blessed.Terminal, self.term)
         # Chunk logic stuff is required to do scrolling when too many
         # vertical items
         choices_with_idx = [c for c in enumerate(self.options)]
