@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import (
