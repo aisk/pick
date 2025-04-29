@@ -4,13 +4,11 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import (
     Any,
-    Generic,
     Iterable,
     List,
     Optional,
     Sequence,
     Tuple,
-    TypeVar,
     Union,
     cast,
 )
@@ -40,61 +38,6 @@ _pick_type = Tuple[Optional[OPTION_T], int]
 PICK_RETURN_T = Union[List[_pick_type], _pick_type]
 
 Position = namedtuple("Position", ["y", "x"])
-
-
-# def _display_screen(
-#     term: blessed.Terminal,
-#     indicator: str,
-#     title: Optional[str],
-#     choices: Sequence[OPTION_T],
-#     index: int,
-#     selected_indexes: list[int],
-#     multiselect: bool,
-#     current_filter: str,
-# ) -> None:
-#     # Chunk logic stuff is required to do scrolling when too many
-#     # vertical items
-#     choices_with_idx = [c for c in enumerate(choices)]
-#
-#     if current_filter:
-#         choices_with_idx = [
-#             choice for choice in choices if str(choice[1]).startswith(current_filter)
-#         ]
-#
-#     if not choices_with_idx:
-#         print(
-#             f"{term.red}No matching results, please press backspace to unfilter...{term.normal}"
-#         )
-#         return
-#
-#     chunk_by = term.height - 5
-#     chunked_choices = [
-#         choices_with_idx[i : i + chunk_by] for i in range(0, len(choices_with_idx), chunk_by)
-#     ]
-#     chunk_to_render = index // chunk_by
-#
-#     if title:
-#         print(title)
-#
-#     for i, val in enumerate(chunked_choices[chunk_to_render]):
-#         selectable = ""
-#         if isinstance(val[1], Option) and not val[1].enabled:
-#             selectable = term.gray35
-#
-#         is_selected = ""
-#         if multiselect:
-#             is_selected = (
-#                 f"{SYMBOL_CIRCLE_EMPTY} "
-#                 if val[0] not in selected_indexes
-#                 else f"{SYMBOL_CIRCLE_FILLED} "
-#             )
-#
-#         if val[0] == index:
-#             print(f"{indicator} {selectable}{is_selected}{val[1]}{term.normal}")
-#         else:
-#             print(
-#                 f"{' ' * (len(indicator) + 1)}{selectable}{is_selected}{val[1]}{term.normal}"
-#             )
 
 
 @dataclass
@@ -138,7 +81,6 @@ class Picker:
 
         self.index = self.default_index
         option = self.options[self.index]
-        # self.idxes_in_scope = list(range(self.term.height))
         self.idxes_in_scope = list(range(len(self.options)))
         self.filter = ""
         if isinstance(option, Option) and not option.enabled:
@@ -276,7 +218,7 @@ class Picker:
                     if key.lower() in _quit_keys:
                         return None, -1
                     else:
-                        # assume they want to be able to filter
+                        # Keystroke gets appended to the current filter
                         self.filter += key
 
                 print(self.term.clear())
@@ -296,38 +238,55 @@ class Picker:
 
     def _display_screen(self) -> None:
         self.term = cast(blessed.Terminal, self.term)
-        # Chunk logic stuff is required to do scrolling when too many
-        # vertical items
-        choices_with_idx = [c for c in enumerate(self.options)]
+        # options_with_idx is used instead of just self.options because
+        # we need to be able to keep track of the original item's index
+        # in the case that we're filtering
+        options_with_idx = [c for c in enumerate(self.options)]
 
         if self.filter:
-            choices_with_idx = [
+            options_with_idx = [
                 choice
-                for choice in choices_with_idx
+                for choice in options_with_idx
                 if str(choice[1]).startswith(self.filter)
             ]
 
-        if not choices_with_idx:
+        if not options_with_idx:
             self.idxes_in_scope = []
             print(
                 f"{self.term.red}No matching results, please press backspace to unfilter...{self.term.normal}"
             )
             return
 
-        chunk_by = self.term.height - 5
+        # Chunk logic stuff is required to do scrolling when too many
+        # vertical items
+        chunk_by = self.term.height - 7
+
         chunked_choices = [
-            choices_with_idx[i : i + chunk_by]
-            for i in range(0, len(choices_with_idx), chunk_by)
+            options_with_idx[i : i + chunk_by]
+            for i in range(0, len(options_with_idx), chunk_by)
         ]
-        chunk_to_render = self.index // chunk_by
+
+        chunk_to_render = 0
+        for i, chunk in enumerate(chunked_choices):
+            if self.index in [p[0] for p in chunk]:
+                chunk_to_render = i
+
+        # need to set this so that when we're doing a command thats not
+        # modifying the filter (i.e up/down) we need to be able to tell
+        # whether the cursor is in scope
+        self.idxes_in_scope = [pair[0] for chunk in chunked_choices for pair in chunk]
+
+        # can't do this bc the index's aren't guarunteed to be consecutive
+        # outside the first iteration:
+        #   chunk_to_render = self.index // chunk_by
 
         if self.title:
             print(self.title)
-        to_show = chunked_choices[chunk_to_render]
 
-        self.idxes_in_scope = [pair[0] for pair in to_show]
+        if chunk_to_render > 0:
+            print("  ( scroll up to reveal previous entries )")
 
-        for i, val in enumerate(chunked_choices[chunk_to_render]):
+        for val in chunked_choices[chunk_to_render]:
             selectable = ""
             if isinstance(val[1], Option) and not val[1].enabled:
                 selectable = self.term.gray35
@@ -349,6 +308,9 @@ class Picker:
                     f"{' ' * (len(self.indicator) + 1)}{selectable}{is_selected}{val[1]}{self.term.normal}"
                 )
 
+        if chunk_to_render < len(chunked_choices) - 1:
+            print(f"  ( scroll down to reveal additional entries )")
+
 
 def pick(
     options: Sequence[OPTION_T],
@@ -367,7 +329,7 @@ def pick(
         term.fullscreen(),
         term.cbreak(),
         term.location(position.x, position.y),
-    ):  # , term.container(height=20, scrollable=True):
+    ):
         picked = Picker(
             options=options,
             title=title,
