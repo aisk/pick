@@ -73,12 +73,13 @@ def _select(
     selected: set[int],
     multiselect: bool,
     quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
+    min_selection_count: int = 0,
 ):
     if not quit_keys:
         quit_keys = []
     else:
         quit_keys = [chr(key_code) for key_code in quit_keys]
-
+    errmsg = ""
     with term.fullscreen(), term.cbreak():
         print(term.clear())
         _display_screen(
@@ -103,8 +104,11 @@ def _select(
                         else:
                             selected.remove(selection_idx)
                 elif key.name == "KEY_ENTER":
-                    if len(selected) == 0 and multiselect:
-                        print("Must select at least one entry!")
+                    if multiselect:
+                        if len(selected) < min_selection_count:
+                            errmsg = f"{term.red}Must select at least {min_selection_count} entry(s)!{term.normal}"
+                        else:
+                            selection_inprogress = False
                     else:
                         selected.add(selection_idx)
                         selection_inprogress = False
@@ -113,7 +117,13 @@ def _select(
                     selection_inprogress = False
 
             selection_idx = selection_idx % len(options)
+
             print(term.clear())
+
+            if errmsg:
+                print(errmsg)
+                errmsg = ""
+
             _display_screen(
                 term, indicator, title, options, selection_idx, selected, multiselect
             )
@@ -137,31 +147,55 @@ def pick(
 
     with term.fullscreen(), term.cbreak():
         picked = _select(
-            options, term, indicator, title, options, 0, set(), multiselect, quit_keys
+            options,
+            term,
+            indicator,
+            title,
+            options,
+            0,
+            set(),
+            multiselect,
+            quit_keys,
+            min_selection_count,
         )
 
-    if multiselect:
-        return picked
-    else:
-        return picked[0]
+    return picked if multiselect else (picked[0] if picked else None)
 
 
-pick(
-    [
-        Option("Option 1", "option 1", "this is option 1", enabled=False),
-        "option 2",
-        "option 3",
-    ],
-    "(Up/down/tab to move; space to select/de-select; Enter to continue)",
-    indicator="=>",
-    multiselect=True,
-    quit_keys=[ord("q")],
+print(
+    "Picked: ",
+    pick(
+        [
+            Option(
+                "Option 1",
+                "option 1",
+                "this is option 1 and is not selectable",
+                enabled=False,
+            ),
+            "option 2",
+            "option 3",
+            Option(
+                "Option 4",
+                "option 4",
+                "this is option 4 and selectable",
+                enabled=True,
+            ),
+        ],
+        "(Up/down/tab to move; space to select/de-select; Enter to continue)",
+        indicator="=>",
+        multiselect=True,
+        quit_keys=[ord("q")],
+    ),
 )
+print()
 
-pick(
-    ["Choice1", "choice 2", "choice3"],
-    "(Up/down/tab to move; Enter to select)",
-    indicator="=>",
-    multiselect=False,
-    quit_keys=[ord("q")],
+print(
+    "Picked: ",
+    pick(
+        ["Choice1", "choice 2", "choice3"],
+        "(Up/down/tab to move; Enter to select)",
+        indicator="=>",
+        multiselect=False,
+        quit_keys=[ord("q")],
+    ),
 )
