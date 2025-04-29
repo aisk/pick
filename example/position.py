@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import curses
 import pick
 
@@ -6,7 +8,7 @@ def main(stdscr):
     stdscr.get_wch()
 
     y, x = stdscr.getyx()
-    
+
     title = "Please choose your favorite programming language: "
     options = ["Java", "JavaScript", "Python", "PHP", "C++", "Erlang", "Haskell"]
     option, index = pick.pick(
@@ -14,7 +16,6 @@ def main(stdscr):
         title,
         indicator="=>",
         default_index=2,
-        screen=stdscr,
         position=pick.Position(y=y, x=0)  # comment this to demonstrate the issue it solves
     )
 

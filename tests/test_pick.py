@@ -1,3 +1,4 @@
+from typing import List
 from pick import Picker, Option
 
 
@@ -64,8 +65,11 @@ def test_option():
         picker.move_down()
     selected_options = picker.get_selected()
     for option in selected_options:
+        assert isinstance(option, tuple)
         assert isinstance(option[0], Option)
     option = selected_options[0]
+    assert isinstance(option, tuple)
+    assert isinstance(option[0], Option)
     assert option[0].label == "option1"
     assert option[0].value == 101
     assert option[0].description == "description1"

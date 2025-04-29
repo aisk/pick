@@ -12,6 +12,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 import blessed
 
@@ -35,7 +36,8 @@ class Option:
 
 
 OPTION_T = Union[Option, str]
-PICK_RETURN_T = Tuple[OPTION_T, int]
+_pick_type = Tuple[Optional[OPTION_T], int]
+PICK_RETURN_T = Union[List[_pick_type], _pick_type]
 
 Position = namedtuple("Position", ["y", "x"])
 
@@ -49,10 +51,19 @@ def _display_screen(
     selected_indexes: list[int],
     multiselect: bool,
 ) -> None:
+    # Chunk logic stuff is required to do scrolling when too many
+    # vertical items
+    chunk_by = term.height - 5
+    chunked_choices = [
+        choices[i : i + chunk_by] for i in range(0, len(choices), chunk_by)
+    ]
+    chunk_to_render = index // chunk_by
+
     if title:
         print(title)
 
-    for idx, val in enumerate(choices):
+    for i, val in enumerate(chunked_choices[chunk_to_render]):
+        idx = i + (chunk_to_render * chunk_by)
         selectable = ""
         if isinstance(val, Option) and not val.enabled:
             selectable = term.gray35
@@ -86,8 +97,7 @@ class Picker:
     position: Position = Position(0, 0)
     clear_screen: bool = True
     quit_keys: Optional[Iterable[int]] = None
-    term: blessed.Terminal = None
-    # ) -> List[PICK_RETURN_T]:
+    term: Optional[blessed.Terminal] = None
 
     # screen: Optional["curses._CursesWindow"] = None
     def __post_init__(self) -> None:
@@ -101,6 +111,9 @@ class Picker:
             raise ValueError(
                 "min_selection_count is bigger than the available options, you will not be able to make any selection"
             )
+        if self.term is None:
+            self.term = blessed.Terminal()
+            # raise ValueError("Must specify term=...; e,g from a prior term=blessed.Terminal()")
 
         if all(
             isinstance(option, Option) and not option.enabled for option in self.options
@@ -143,7 +156,40 @@ class Picker:
                 else:
                     self.selected_indexes.append(self.index)
 
-    def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
+    def get_title_lines(self) -> List[str]:
+        if self.title:
+            return [self.title, ""]
+        return []
+
+    def get_option_lines(self) -> List[str]:
+        lines: List[str] = []
+        for index, option in enumerate(self.options):
+            if index == self.index:
+                prefix = self.indicator
+            else:
+                prefix = len(self.indicator) * " "
+
+            if self.multiselect:
+                symbol = (
+                    SYMBOL_CIRCLE_FILLED
+                    if index in self.selected_indexes
+                    else SYMBOL_CIRCLE_EMPTY
+                )
+                prefix = f"{prefix} {symbol}"
+
+            option_as_str = option.label if isinstance(option, Option) else option
+            lines.append(f"{prefix} {option_as_str}")
+
+        return lines
+
+    def get_lines(self) -> Tuple[List[str], int]:
+        title_lines = self.get_title_lines()
+        option_lines = self.get_option_lines()
+        lines = title_lines + option_lines
+        current_line = self.index + len(title_lines) + 1
+        return lines, current_line
+
+    def get_selected(self) -> PICK_RETURN_T:
         """Return the current selected option as a tuple: (option, index)
         or as a list of tuples (in case multiselect==True)
         """
@@ -156,7 +202,8 @@ class Picker:
         else:
             return self.options[self.index], self.index
 
-    def start(self):
+    def start(self) -> PICK_RETURN_T:
+        self.term = cast(blessed.Terminal, self.term)
         _quit_keys: list[str] = (
             []
             if self.quit_keys is None
@@ -198,7 +245,7 @@ class Picker:
                     if key.lower() in _quit_keys:
                         return None, -1
 
-                self.index = self.index % len(self.options)
+                # self.index = self.index % len(self.options)
 
                 print(self.term.clear())
 
@@ -229,13 +276,14 @@ def pick(
     position: Position = Position(0, 0),
     clear_screen: bool = True,
     quit_keys: Optional[Iterable[int]] = None,
-) -> Union[List[PICK_RETURN_T], Optional[PICK_RETURN_T]]:
+) -> PICK_RETURN_T:
     term = blessed.Terminal()
     picked = None
-
-    with term.fullscreen(), term.cbreak():
-        print(Picker(["a"], "a"))
-        print("???")
+    with (
+        term.fullscreen(),
+        term.cbreak(),
+        term.location(position.x, position.y),
+    ):  # , term.container(height=20, scrollable=True):
         picked = Picker(
             options=options,
             title=title,
@@ -251,45 +299,46 @@ def pick(
             term=term,
         ).start()
 
-    return picked if multiselect else (picked[0] if picked else None)
+    return picked
 
 
-print(
-    "Picked: ",
-    pick(
-        [
-            Option(
-                "Option 1",
-                "option 1",
-                "this is option 1 and is not selectable",
-                enabled=False,
-            ),
-            "option 2",
-            "option 3",
-            Option(
-                "Option 4",
-                "option 4",
-                "this is option 4 and selectable",
-                enabled=True,
-            ),
-        ],
-        "(Up/down/tab to move; space to select/de-select; Enter to continue)",
-        indicator="=>",
-        multiselect=True,
-        quit_keys=[ord("q")],
-        clear_screen=False,
-        min_selection_count=2,
-    ),
-)
-print()
+if __name__ == "__main__":
+    print(
+        "Picked: ",
+        pick(
+            [
+                Option(
+                    "Option 1",
+                    "option 1",
+                    "this is option 1 and is not selectable",
+                    enabled=False,
+                ),
+                "option 2",
+                "option 3",
+                Option(
+                    "Option 4",
+                    "option 4",
+                    "this is option 4 and selectable",
+                    enabled=True,
+                ),
+            ],
+            "(Up/down/tab to move; space to select/de-select; Enter to continue)",
+            indicator="=>",
+            multiselect=True,
+            quit_keys=[ord("q")],
+            clear_screen=False,
+            min_selection_count=2,
+        ),
+    )
+    print()
 
-print(
-    "Picked: ",
-    pick(
-        ["Choice1", "choice 2", "choice3"],
-        "(Up/down/tab to move; Enter to select)",
-        indicator="=>",
-        multiselect=False,
-        quit_keys=[ord("q")],
-    ),
-)
+    print(
+        "Picked: ",
+        pick(
+            ["Choice1", "choice 2", "choice3"],
+            "(Up/down/tab to move; Enter to select)",
+            indicator="=>",
+            multiselect=False,
+            quit_keys=[ord("q")],
+        ),
+    )
