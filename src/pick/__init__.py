@@ -26,11 +26,10 @@ class Option:
     value: Any = None
     description: Optional[str] = None
     enabled: bool = True
+    color: str = ""
 
     def __str__(self) -> str:
-        return (
-            f"{self.label}{' (' + self.description + ')' if self.description else ''}"
-        )
+        return f"{self.color}{self.label}{' (' + self.description + ')' if self.description else ''}"
 
 
 OPTION_T = Union[Option, str]
@@ -154,7 +153,11 @@ class Picker:
                 )
                 prefix = f"{prefix} {symbol}"
 
-            option_as_str = option.label if isinstance(option, Option) else option
+            option_as_str = (
+                f"{option.color}{option.label}{self.term.normal}"
+                if isinstance(option, Option)
+                else option
+            )
             lines.append(f"{prefix} {option_as_str}")
 
         return lines
@@ -394,9 +397,19 @@ if __name__ == "__main__":
                 Option(
                     "Option 4",
                     "option 4",
-                    "this is option 4 and selectable",
+                    "this is option 4 and selectable and green",
                     enabled=True,
+                    color=blessed.Terminal().green,
                 ),
+                "option 5",
+                Option(
+                    "Option 6",
+                    "option 6",
+                    "this is option 6 and colored but unselectable",
+                    enabled=False,
+                    color=blessed.Terminal().pink,
+                ),
+                "option 5",
             ],
             "(Up/down/tab to move; space to select/de-select; Enter to continue)",
             indicator="=>",
