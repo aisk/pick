@@ -254,11 +254,16 @@ class Picker:
         options_with_idx = [c for c in enumerate(self.options)]
 
         if self.filter:
-            options_with_idx = [
-                choice
-                for choice in options_with_idx
-                if str(choice[1]).startswith(self.filter)
-            ]
+            new = []
+            for choice in options_with_idx:
+                opt = choice[1]
+                if isinstance(opt, Option):
+                    if opt.label.startswith(self.filter) and opt.enabled:
+                        new.append(choice)
+                else:
+                    if opt.startswith(self.filter):
+                        new.append(choice)
+            options_with_idx = new
 
         if not options_with_idx:
             self.idxes_in_scope = []
