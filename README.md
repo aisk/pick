@@ -60,6 +60,8 @@ interactive selection list in the terminal.
 - `position`: (optional), if you are using `pick` within an existing curses application use this to set the first position to write to. e.g., `position=pick.Position(y=1, x=1)`
 - `quit_keys`: (optional), if you want to quit early, you can pass a key codes.
   If the corresponding key are pressed, it will quit the menu.
+- `disabled_color`: (optional) if you want to change the color that disabled options are; by default, is grey. Accepts a string like ANSI code. e.g. to make them bold red: `disabled_color='\x1b[1;31m'`; can also use codes from blessed like `disabled_color=Terminal().yellow`; to make it not-colored, `disabled_color=""`)
+- `pagination_color`: (optional) if you want to change the color that the pagination messages (shown when there is multiple pages of content to scroll through); by default, is uncolored. Accepts a string like ANSI code. e.g. to make them bold red: `pagination_color='\x1b[1;31m'`; can also use codes from blessed like `pagination=Terminal().yellow`)
 
 ## Community Projects
 

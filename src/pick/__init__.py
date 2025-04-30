@@ -56,6 +56,8 @@ class Picker:
     term: Optional[blessed.Terminal] = None
     idxes_in_scope: List[int] = field(init=False, default_factory=list)
     filter: str = field(init=False, default_factory=str)
+    disabled_color: str = ("",)
+    pagination_color: str = ""
 
     # screen: Optional["curses._CursesWindow"] = None
     def __post_init__(self) -> None:
@@ -303,12 +305,14 @@ class Picker:
             print(self.title)
 
         if chunk_to_render > 0:
-            print("  ( scroll up to reveal previous entries )")
+            print(
+                f"{self.pagination_color}  ( scroll up to reveal previous entries ){self.term.normal}"
+            )
 
         for val in chunked_choices[chunk_to_render]:
             selectable = ""
             if isinstance(val[1], Option) and not val[1].enabled:
-                selectable = self.term.gray35
+                selectable = self.disabled_color
 
             is_selected = ""
             if self.multiselect:
@@ -328,7 +332,9 @@ class Picker:
                 )
 
         if chunk_to_render < len(chunked_choices) - 1:
-            print(f"  ( scroll down to reveal additional entries )")
+            print(
+                f"{self.pagination_color}  ( scroll down to reveal additional entries ){self.term.normal}"
+            )
 
 
 def pick(
@@ -341,8 +347,11 @@ def pick(
     position: Position = Position(0, 0),
     clear_screen: bool = True,
     quit_keys: Optional[Iterable[int]] = None,
+    disabled_color: str = blessed.Terminal().gray35,
+    pagination_color: str = "",
 ) -> PICK_RETURN_T:
     term = blessed.Terminal()
+    term.yellow
     picked = None
     with (
         term.fullscreen(),
@@ -362,6 +371,8 @@ def pick(
             position=position,
             quit_keys=quit_keys,
             term=term,
+            disabled_color=disabled_color,
+            pagination_color=pagination_color,
         ).start()
 
     return picked
