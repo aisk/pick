@@ -1,5 +1,6 @@
 from collections import namedtuple
 from dataclasses import dataclass, field
+from functools import partial
 from typing import (
     Any,
     Iterable,
@@ -11,6 +12,7 @@ from typing import (
     cast,
 )
 import blessed
+from math import ceil
 
 __all__ = ["pick", "Picker", "Option"]
 
@@ -257,17 +259,37 @@ class Picker:
 
         # Chunk logic stuff is required to do scrolling when too many
         # vertical items
-        chunk_by = self.term.height - 7
-
-        chunked_choices = [
-            options_with_idx[i : i + chunk_by]
-            for i in range(0, len(options_with_idx), chunk_by)
-        ]
-
+        chunked_choices = []
+        current_chunk = []
+        so_far = 0
         chunk_to_render = 0
-        for i, chunk in enumerate(chunked_choices):
-            if self.index in [p[0] for p in chunk]:
-                chunk_to_render = i
+        page = 0
+        for idx, pairing in enumerate(options_with_idx):
+            if isinstance(pairing[1], Option):
+                linesize = len(pairing[1].label)
+            else:
+                linesize = len(pairing[1])
+
+            # height of title, plus two pagination lines
+            pad_height = ceil(len(self.title) / self.term.width) + 3
+            # pad a bit for unknown title lengh
+            lines_used = ceil((linesize + pad_height) / self.term.width)
+            so_far += lines_used
+            if so_far > (self.term.height - pad_height):
+                # need to roll over
+                chunked_choices.append(current_chunk)
+                current_chunk = [pairing]
+                so_far = lines_used
+                page += 1
+            else:
+                current_chunk.append(pairing)
+
+            if idx == len(options_with_idx) - 1:
+                # at the end, need to add what we've built then drop out
+                chunked_choices.append(current_chunk)
+
+            if self.index == pairing[0]:
+                chunk_to_render = page
 
         # need to set this so that when we're doing a command thats not
         # modifying the filter (i.e up/down) we need to be able to tell
