@@ -270,9 +270,8 @@ class Picker:
             else:
                 linesize = len(pairing[1])
 
-            # height of title, plus two pagination lines
-            pad_height = ceil(len(self.title) / self.term.width) + 3
-            # pad a bit for unknown title lengh
+            # height of title, plus two pagination lines, plus some extra room:
+            pad_height = ceil(len(self.title) / self.term.width) + 2 + 10
             lines_used = ceil((linesize + pad_height) / self.term.width)
             so_far += lines_used
             if so_far > (self.term.height - pad_height):
