@@ -329,9 +329,10 @@ class Picker:
             )
 
         for val in chunked_choices[chunk_to_render]:
-            selectable = ""
+            unselectable = ""
+            val_label = str(val[1])
             if isinstance(val[1], Option) and not val[1].enabled:
-                selectable = self.disabled_color
+                unselectable = self.disabled_color
 
             is_selected = ""
             if self.multiselect:
@@ -340,15 +341,20 @@ class Picker:
                     if val[0] not in self.selected_indexes
                     else f"{SYMBOL_CIRCLE_FILLED} "
                 )
-
-            if val[0] == self.index:
-                print(
-                    f"{self.indicator} {selectable}{is_selected}{val[1]}{self.term.normal}"
+            if unselectable:
+                # need to scrub all color
+                label = (
+                    unselectable
+                    + escape_ansi(is_selected + val_label)
+                    + self.term.normal
                 )
             else:
-                print(
-                    f"{' ' * (len(self.indicator) + 1)}{selectable}{is_selected}{val[1]}{self.term.normal}"
-                )
+                label = f"{is_selected}{val_label}{self.term.normal}"
+
+            if val[0] == self.index:
+                print(f"{self.indicator} {label}")
+            else:
+                print(f"{' ' * (len(self.indicator) + 1)}{label}")
 
         if chunk_to_render < len(chunked_choices) - 1:
             print(
