@@ -191,8 +191,13 @@ class Picker:
         )
         errmsg = ""
 
-        with self.term.fullscreen(), self.term.cbreak(), self.term.hidden_cursor():
-            print(self.term.clear())
+        with (
+            self.term.fullscreen(),
+            self.term.cbreak(),
+            self.term.location(self.position.x, self.position.y),
+        ):
+            if self.clear_screen:
+                print(self.term.clear())
             self._display_screen()
 
             selection_inprogress = True
@@ -347,38 +352,28 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    position: Position = Position(0, 0),
+    position: Position = Position(1, 0),
     clear_screen: bool = True,
     quit_keys: Optional[Iterable[int]] = None,
     disabled_color: str = blessed.Terminal().gray35,
     pagination_color: str = "",
 ) -> PICK_RETURN_T:
-    term = blessed.Terminal()
-    term.yellow
-    picked = None
-    with (
-        term.fullscreen(),
-        term.cbreak(),
-        term.location(position.x, position.y),
-    ):
-        picked = Picker(
-            options=options,
-            title=title,
-            indicator=indicator,
-            default_index=default_index,
-            multiselect=multiselect,
-            min_selection_count=min_selection_count,
-            selected_indexes=[],
-            index=0,
-            clear_screen=clear_screen,
-            position=position,
-            quit_keys=quit_keys,
-            term=term,
-            disabled_color=disabled_color,
-            pagination_color=pagination_color,
-        ).start()
-
-    return picked
+    return Picker(
+        options=options,
+        title=title,
+        indicator=indicator,
+        default_index=default_index,
+        multiselect=multiselect,
+        min_selection_count=min_selection_count,
+        selected_indexes=[],
+        index=0,
+        clear_screen=clear_screen,
+        position=position,
+        quit_keys=quit_keys,
+        term=blessed.Terminal(),
+        disabled_color=disabled_color,
+        pagination_color=pagination_color,
+    ).start()
 
 
 if __name__ == "__main__":
