@@ -198,6 +198,7 @@ class Picker:
         errmsg = ""
 
         with (
+            self.term.hidden_cursor(),
             self.term.fullscreen(),
             self.term.cbreak(),
             self.term.location(self.position.x, self.position.y),
@@ -221,7 +222,11 @@ class Picker:
                     ):
                         self.mark_index()
                     elif key.name == "KEY_ENTER":
-                        if (
+                        if len(self.idxes_in_scope) == 0:
+                            # don't let the user enter when
+                            # filtered too constrictively
+                            continue
+                        elif (
                             self.multiselect
                             and len(self.selected_indexes) < self.min_selection_count
                         ):
