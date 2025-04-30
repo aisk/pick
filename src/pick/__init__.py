@@ -13,11 +13,17 @@ from typing import (
 )
 import blessed
 from math import ceil
+from re import compile as re_compile
 
 __all__ = ["pick", "Picker", "Option"]
 
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
+
+
+def escape_ansi(line: str) -> str:
+    ansi_escape = re_compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
+    return ansi_escape.sub("", line)
 
 
 @dataclass
@@ -258,10 +264,10 @@ class Picker:
             for choice in options_with_idx:
                 opt = choice[1]
                 if isinstance(opt, Option):
-                    if opt.label.startswith(self.filter) and opt.enabled:
+                    if escape_ansi(opt.label).startswith(self.filter) and opt.enabled:
                         new.append(choice)
                 else:
-                    if opt.startswith(self.filter):
+                    if escape_ansi(opt).startswith(self.filter):
                         new.append(choice)
             options_with_idx = new
 
