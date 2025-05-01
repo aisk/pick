@@ -11,11 +11,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install poetry
-        run: pipx install poetry --python python${{ matrix.python-version }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: pipx install poetry --python python${{ matrix.python-version }} --verbose
+      - name: Cache poetry
+        uses: actions/cache@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
+        with:
+          path: |
+            ~/.cache/pypoetry/virtualenvs
+            ~/.cache/pypoetry/cache
+            ~/.cache/pypoetry/artifacts
+          key: poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
       - name: Install dependencies
         run: poetry install
       - name: Static type checking
