@@ -64,6 +64,7 @@ def test_option():
         picker.move_down()
     selected_options = picker.get_selected()
     for option in selected_options:
+        assert isinstance(option, tuple)
         assert isinstance(option[0], Option)
     option = selected_options[0]
     assert option[0].label == "option1"
