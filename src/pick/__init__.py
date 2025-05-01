@@ -61,7 +61,7 @@ class Picker:
     term: Optional[blessed.Terminal] = None
     idxes_in_scope: List[int] = field(init=False, default_factory=list)
     filter: str = field(init=False, default_factory=str)
-    disabled_color: str = ("",)
+    disabled_color: str = ""
     pagination_color: str = ""
 
     # screen: Optional["curses._CursesWindow"] = None
@@ -144,6 +144,7 @@ class Picker:
         return []
 
     def get_option_lines(self) -> List[str]:
+        self.term = cast(blessed.Terminal, self.term)
         lines: List[str] = []
         for index, option in enumerate(self.options):
             if index == self.index:
@@ -285,8 +286,8 @@ class Picker:
 
         # Chunk logic stuff is required to do scrolling when too many
         # vertical items
-        chunked_choices = []
-        current_chunk = []
+        chunked_choices: list[List[Tuple[int, OPTION_T]]] = []
+        current_chunk: List[Tuple[int, OPTION_T]] = []
         so_far = 0
         chunk_to_render = 0
         page = 0
@@ -297,7 +298,8 @@ class Picker:
                 linesize = len(pairing[1])
 
             # height of title, plus two pagination lines, plus some extra room:
-            pad_height = ceil(len(self.title) / self.term.width) + 2 + 10
+            title_size = 0 if not self.title else len(self.title)
+            pad_height = ceil(title_size / self.term.width) + 2 + 10
             lines_used = ceil((linesize + pad_height) / self.term.width)
             so_far += lines_used
             if so_far > (self.term.height - pad_height):
