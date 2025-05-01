@@ -11,11 +11,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry --python python${{ matrix.python-version }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install poetry
-        run: pipx install poetry --python python${{ matrix.python-version }}
       - name: Install dependencies
         run: poetry install
       - name: Static type checking
