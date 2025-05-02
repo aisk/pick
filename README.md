@@ -107,11 +107,62 @@ pick(
   multiple items by hitting SPACE
 - `min_selection_count`: (optional) for multi select feature to
   dictate a minimum of selected items before continuing
-- `position`: (optional), if you are using `pick` within an existing curses application use this to set the first position to write to. e.g., `position=pick.Position(y=1, x=1)`
-- `quit_keys`: (optional), if you want to quit early, you can pass a key codes.
-  If the corresponding key are pressed, it will quit the menu.
-- `disabled_color`: (optional) if you want to change the color that disabled options are; by default, is grey. Accepts a string like ANSI code. e.g. to make them bold red: `disabled_color='\x1b[1;31m'`; can also use codes from blessed like `disabled_color=Terminal().yellow`; to make it not-colored, `disabled_color=""`)
-- `pagination_color`: (optional) if you want to change the color that the pagination messages (shown when there is multiple pages of content to scroll through); by default, is uncolored. Accepts a string like ANSI code. e.g. to make them bold red: `pagination_color='\x1b[1;31m'`; can also use codes from blessed like `pagination=Terminal().yellow`)
+- `position`: (optional), if you are using `pick` within an existing
+  curses application use this to set the first position to write to.
+  e.g., `position=pick.Position(y=1, x=1)`
+- `quit_keys`: (optional; default `ESC` key), if you want to quit
+  early, you can pass a key codes. If the corresponding key are pressed,
+  it will quit the menu.
+- `up_keys`: (optional; default: up arrow), keys to move the menu
+  selection up
+- `down_keys`: (optional; default: down arrow or tab), keys to move
+  the menu selection down
+- `select_keys`: (optional; default: space key), When in multiselect mode,
+  keys to add/remove the current selection to/from the list of selected
+  items
+- `enter_keys`: (optional; default: enter key), Key to confirm choices
+  and close menu
+- `disabled_color`: (optional) if you want to change the color that
+  disabled options are; by default, is grey. Accepts a string like ANSI
+  code. e.g. to make them bold red: `disabled_color='\x1b[1;31m'`; can
+  also use codes from blessed like `disabled_color=Terminal().yellow`;
+  to make it not-colored, `disabled_color=""`)
+- `pagination_color`: (optional) if you want to change the color that
+  the pagination messages (shown when there is multiple pages of content
+  to scroll through); by default, is uncolored. Accepts a string like
+  ANSI code. e.g. to make them bold red: `pagination_color='\x1b[1;31m'`;
+  can also use codes from blessed like `pagination=Terminal().yellow`)
+
+#### Specifying keys
+
+* Refer to list of names from the [blessed docs](https://blessed.readthedocs.io/en/latest/keyboard.html#id1)
+
+If the key you wish to use is a single non-system key (i.e alphanumeric),
+then you can use `ord('<key>')`; however, in order to specify system keys,
+you must specify them to the `*_keys` parameter like so:
+
+```python
+from blessed.keyboard import get_curses_keycodes # type: ignore
+
+# Would allow the user to select current selection with
+# BOTH space (default) and the right arrow:
+pick(..., select_keys = [get_curses_keycodes()["KEY_RIGHT"], ...)
+```
+
+Note that options passed are _additive_ to the defaults. If you wish
+to override the defaults entirely, you must also set the constant values
+to nothing before calling `pick`:
+
+```python
+import pick
+
+# overwrite UP_KEYS, DOWN_KEYS, SELECT_KEYS, ENTER_KEYS, QUIT_KEYS
+pick.UP_KEYS = []
+
+# would result in "u" being the only way to move the cursor up
+pick(..., up_keys = [ord('U')], ...)
+```
+
 
 ## Community Projects
 

@@ -1,9 +1,9 @@
-from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import (
     Any,
     Iterable,
     List,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -13,11 +13,23 @@ from typing import (
 import blessed
 from math import ceil
 from re import compile as re_compile
+from blessed.keyboard import get_curses_keycodes, get_keyboard_codes  # type: ignore
 
 __all__ = ["pick", "Picker", "Option"]
 
+
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
+
+_keys = get_curses_keycodes()
+UP_KEYS: List[int] = [_keys["KEY_UP"]]
+DOWN_KEYS: List[int] = [
+    _keys["KEY_DOWN"],
+    next(code for code, key in get_keyboard_codes().items() if key == "KEY_TAB"),
+]
+SELECT_KEYS: List[int] = [ord(" ")]
+ENTER_KEYS: List[int] = [_keys["KEY_ENTER"]]
+QUIT_KEYS: List[int] = [_keys["KEY_EXIT"]]
 
 
 def escape_ansi(line: str) -> str:
@@ -41,7 +53,10 @@ OPTION_T = Union[Option, str]
 _pick_type = Tuple[Optional[OPTION_T], int]
 PICK_RETURN_T = Union[List[_pick_type], _pick_type]
 
-Position = namedtuple("Position", ["y", "x"])
+
+class Position(NamedTuple):
+    y: int
+    x: int
 
 
 @dataclass
@@ -56,14 +71,17 @@ class Picker:
     index: int = field(init=True, default=0)
     position: Position = Position(0, 0)
     clear_screen: bool = True
-    quit_keys: Optional[Iterable[int]] = None
+    quit_keys: List[int] = field(init=True, default_factory=list)
     term: Optional[blessed.Terminal] = None
     idxes_in_scope: List[int] = field(init=False, default_factory=list)
     filter: str = field(init=False, default_factory=str)
+    up_keys: List[int] = field(init=True, default_factory=list)
+    down_keys: List[int] = field(init=True, default_factory=list)
+    enter_keys: List[int] = field(init=True, default_factory=list)
+    select_keys: List[int] = field(init=True, default_factory=list)
     disabled_color: str = ""
     pagination_color: str = ""
 
-    # screen: Optional["curses._CursesWindow"] = None
     def __post_init__(self) -> None:
         if len(self.options) == 0:
             raise ValueError("options should not be an empty list")
@@ -89,6 +107,7 @@ class Picker:
         option = self.options[self.index]
         self.idxes_in_scope = list(range(len(self.options)))
         self.filter = ""
+
         if isinstance(option, Option) and not option.enabled:
             self.move_down()
 
@@ -190,18 +209,15 @@ class Picker:
 
     def start(self) -> PICK_RETURN_T:
         self.term = cast(blessed.Terminal, self.term)
-        _quit_keys: List[str] = (
-            []
-            if self.quit_keys is None
-            else [chr(key_code) for key_code in self.quit_keys]
-        )
         errmsg = ""
 
         # Note: can't use parenthesis here bc that is >= 3.10
-        with self.term.hidden_cursor(), \
-            self.term.fullscreen(), \
-            self.term.cbreak(), \
-            self.term.location(self.position.x, self.position.y):
+        with (
+            self.term.hidden_cursor(),
+            self.term.fullscreen(),
+            self.term.cbreak(),
+            self.term.location(self.position.x, self.position.y),
+        ):
             if self.clear_screen:
                 print(self.term.clear())
             self._display_screen()
@@ -209,37 +225,40 @@ class Picker:
             selection_inprogress = True
             while selection_inprogress:
                 key = self.term.inkey()
-                if key.is_sequence or key == " ":
-                    if key.name in {"KEY_TAB", "KEY_DOWN"}:
-                        self.move_down()
-                    elif key.name == "KEY_UP":
-                        self.move_up()
+                key_code = ord(key) if not key.is_sequence else key.code
+                if key_code in self.quit_keys:
+                    return None, -1
+
+                if key_code in self.down_keys:
+                    self.move_down()
+                elif key_code in self.up_keys:
+                    self.move_up()
+                elif (
+                    key_code in self.select_keys
+                    and self.multiselect
+                    and len(self.idxes_in_scope) != 0
+                ):
+                    self.mark_index()
+                elif key_code in self.enter_keys:
+                    if len(self.idxes_in_scope) == 0:
+                        # don't let the user enter when
+                        # filtered too constrictively
+                        continue
                     elif (
-                        key == " "
-                        and self.multiselect
-                        and len(self.idxes_in_scope) != 0
+                        self.multiselect
+                        and len(self.selected_indexes) < self.min_selection_count
                     ):
-                        self.mark_index()
-                    elif key.name == "KEY_ENTER":
-                        if len(self.idxes_in_scope) == 0:
-                            # don't let the user enter when
-                            # filtered too constrictively
-                            continue
-                        elif (
-                            self.multiselect
-                            and len(self.selected_indexes) < self.min_selection_count
-                        ):
-                            errmsg = f"{self.term.red}Must select at least {self.min_selection_count} entry(s)!{self.term.normal}"
-                        else:
-                            return self.get_selected()
-                    elif key.name == "KEY_BACKSPACE":
-                        self.filter = self.filter[:-1] if self.filter else ""
-                else:
-                    if key.lower() in _quit_keys:
-                        return None, -1
+                        errmsg = (
+                            f"{self.term.red}Must select at least {self.min_selection_count} "
+                            + f"entry(s)!{self.term.normal}"
+                        )
                     else:
-                        # Keystroke gets appended to the current filter
-                        self.filter += key
+                        return self.get_selected()
+                elif key.is_sequence and key.name == "KEY_BACKSPACE":
+                    self.filter = self.filter[:-1] if self.filter else ""
+                else:
+                    # Is not a special key, so add it to the current filter
+                    self.filter += key
 
                 print(self.term.clear())
 
@@ -264,7 +283,7 @@ class Picker:
         options_with_idx = [c for c in enumerate(self.options)]
 
         if self.filter:
-            new = []
+            new: list[Tuple[int, OPTION_T]] = []
             for choice in options_with_idx:
                 opt = choice[1]
                 if isinstance(opt, Option):
@@ -376,10 +395,20 @@ def pick(
     min_selection_count: int = 0,
     position: Position = Position(1, 0),
     clear_screen: bool = True,
-    quit_keys: Optional[Iterable[int]] = None,
+    up_keys: Optional[List[int]] = None,
+    down_keys: Optional[List[int]] = None,
+    select_keys: Optional[List[int]] = None,
+    enter_keys: Optional[List[int]] = None,
+    quit_keys: Optional[List[int]] = None,
     disabled_color: str = blessed.Terminal().gray35,
     pagination_color: str = "",
 ) -> PICK_RETURN_T:
+    up_keys = UP_KEYS if up_keys is None else UP_KEYS + up_keys
+    down_keys = DOWN_KEYS if down_keys is None else DOWN_KEYS + down_keys
+    select_keys = SELECT_KEYS if select_keys is None else SELECT_KEYS + select_keys
+    enter_keys = ENTER_KEYS if enter_keys is None else ENTER_KEYS + enter_keys
+    quit_keys = QUIT_KEYS if quit_keys is None else QUIT_KEYS + quit_keys
+
     return Picker(
         options=options,
         title=title,
@@ -391,6 +420,10 @@ def pick(
         index=0,
         clear_screen=clear_screen,
         position=position,
+        up_keys=up_keys,
+        down_keys=down_keys,
+        select_keys=select_keys,
+        enter_keys=enter_keys,
         quit_keys=quit_keys,
         term=blessed.Terminal(),
         disabled_color=disabled_color,
@@ -431,7 +464,6 @@ if __name__ == "__main__":
             "(Up/down/tab to move; space to select/de-select; Enter to continue)",
             indicator="=>",
             multiselect=True,
-            quit_keys=[ord("q")],
             clear_screen=False,
             min_selection_count=2,
         ),
