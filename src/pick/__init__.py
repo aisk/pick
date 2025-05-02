@@ -1,6 +1,5 @@
 from collections import namedtuple
 from dataclasses import dataclass, field
-from functools import partial
 from typing import (
     Any,
     Iterable,
@@ -191,19 +190,18 @@ class Picker:
 
     def start(self) -> PICK_RETURN_T:
         self.term = cast(blessed.Terminal, self.term)
-        _quit_keys: list[str] = (
+        _quit_keys: List[str] = (
             []
             if self.quit_keys is None
             else [chr(key_code) for key_code in self.quit_keys]
         )
         errmsg = ""
 
-        with (
-            self.term.hidden_cursor(),
-            self.term.fullscreen(),
-            self.term.cbreak(),
-            self.term.location(self.position.x, self.position.y),
-        ):
+        # Note: can't use parenthesis here bc that is >= 3.10
+        with self.term.hidden_cursor(), \
+            self.term.fullscreen(), \
+            self.term.cbreak(), \
+            self.term.location(self.position.x, self.position.y):
             if self.clear_screen:
                 print(self.term.clear())
             self._display_screen()
@@ -286,7 +284,7 @@ class Picker:
 
         # Chunk logic stuff is required to do scrolling when too many
         # vertical items
-        chunked_choices: list[List[Tuple[int, OPTION_T]]] = []
+        chunked_choices: List[List[Tuple[int, OPTION_T]]] = []
         current_chunk: List[Tuple[int, OPTION_T]] = []
         so_far = 0
         chunk_to_render = 0
