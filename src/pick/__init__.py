@@ -1,10 +1,40 @@
-import curses
-import textwrap
-from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
+import blessed
+from math import ceil
+from re import compile as re_compile
+from blessed.keyboard import get_curses_keycodes, get_keyboard_codes  # type: ignore
 
-__all__ = ["Picker", "pick", "Option"]
+__all__ = ["pick", "Picker", "Option"]
+
+
+SYMBOL_CIRCLE_FILLED = "(x)"
+SYMBOL_CIRCLE_EMPTY = "( )"
+
+_keys = get_curses_keycodes()
+UP_KEYS: List[int] = [_keys["KEY_UP"]]
+DOWN_KEYS: List[int] = [
+    _keys["KEY_DOWN"],
+    next(code for code, key in get_keyboard_codes().items() if key == "KEY_TAB"),
+]
+SELECT_KEYS: List[int] = [ord(" ")]
+ENTER_KEYS: List[int] = [_keys["KEY_ENTER"]]
+QUIT_KEYS: List[int] = [_keys["KEY_EXIT"]]
+
+
+def escape_ansi(line: str) -> str:
+    ansi_escape = re_compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
+    return ansi_escape.sub("", line)
 
 
 @dataclass
@@ -13,35 +43,44 @@ class Option:
     value: Any = None
     description: Optional[str] = None
     enabled: bool = True
+    color: str = ""
+
+    def __str__(self) -> str:
+        return f"{self.color}{self.label}{' (' + self.description + ')' if self.description else ''}"
 
 
-KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
-KEYS_UP = (curses.KEY_UP, ord("k"))
-KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
-KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
+OPTION_T = Union[Option, str]
+_pick_type = Tuple[Optional[OPTION_T], int]
+PICK_RETURN_T = Union[List[_pick_type], _pick_type]
 
-SYMBOL_CIRCLE_FILLED = "(x)"
-SYMBOL_CIRCLE_EMPTY = "( )"
 
-OPTION_T = TypeVar("OPTION_T", str, Option)
-PICK_RETURN_T = Tuple[OPTION_T, int]
+class Position(NamedTuple):
+    y: int
+    x: int
 
-Position = namedtuple('Position', ['y', 'x'])
 
 @dataclass
-class Picker(Generic[OPTION_T]):
+class Picker:
     options: Sequence[OPTION_T]
     title: Optional[str] = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    selected_indexes: List[int] = field(init=False, default_factory=list)
-    index: int = field(init=False, default=0)
-    screen: Optional["curses._CursesWindow"] = None
+    selected_indexes: List[int] = field(init=True, default_factory=list)
+    index: int = field(init=True, default=0)
     position: Position = Position(0, 0)
     clear_screen: bool = True
-    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None
+    quit_keys: List[int] = field(init=True, default_factory=list)
+    term: Optional[blessed.Terminal] = None
+    idxes_in_scope: List[int] = field(init=False, default_factory=list)
+    filter: str = field(init=False, default_factory=str)
+    up_keys: List[int] = field(init=True, default_factory=list)
+    down_keys: List[int] = field(init=True, default_factory=list)
+    enter_keys: List[int] = field(init=True, default_factory=list)
+    select_keys: List[int] = field(init=True, default_factory=list)
+    disabled_color: str = ""
+    pagination_color: str = ""
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -54,60 +93,76 @@ class Picker(Generic[OPTION_T]):
             raise ValueError(
                 "min_selection_count is bigger than the available options, you will not be able to make any selection"
             )
+        if self.term is None:
+            self.term = blessed.Terminal()
 
-        if all(isinstance(option, Option) and not option.enabled for option in self.options):
+        if all(
+            isinstance(option, Option) and not option.enabled for option in self.options
+        ):
             raise ValueError(
                 "all given options are disabled, you must at least have one enabled option."
             )
 
         self.index = self.default_index
         option = self.options[self.index]
+        self.idxes_in_scope = list(range(len(self.options)))
+        self.filter = ""
+
         if isinstance(option, Option) and not option.enabled:
             self.move_down()
 
     def move_up(self) -> None:
+        if not self.idxes_in_scope:
+            # user pressed up/down with a filter with no items;
+            # break out or else it will infinitely decrement index
+            return
+
         while True:
             self.index -= 1
             if self.index < 0:
                 self.index = len(self.options) - 1
             option = self.options[self.index]
+            if self.index not in self.idxes_in_scope:
+                continue
             if not isinstance(option, Option) or option.enabled:
                 break
 
     def move_down(self) -> None:
+        if not self.idxes_in_scope:
+            # user pressed up/down with a filter with no items;
+            # break out or else it will infinitely decrement index
+            return
+
         while True:
             self.index += 1
             if self.index >= len(self.options):
                 self.index = 0
             option = self.options[self.index]
+
+            if self.index not in self.idxes_in_scope:
+                continue
+
             if not isinstance(option, Option) or option.enabled:
                 break
 
     def mark_index(self) -> None:
         if self.multiselect:
-            if self.index in self.selected_indexes:
-                self.selected_indexes.remove(self.index)
-            else:
-                self.selected_indexes.append(self.index)
+            item = self.options[self.index]
+            if (isinstance(item, Option) and item.enabled) or not isinstance(
+                item, Option
+            ):
+                if self.index in self.selected_indexes:
+                    self.selected_indexes.remove(self.index)
+                else:
+                    self.selected_indexes.append(self.index)
 
-    def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
-        """return the current selected option as a tuple: (option, index)
-        or as a list of tuples (in case multiselect==True)
-        """
-        if self.multiselect:
-            return_tuples = []
-            for selected in self.selected_indexes:
-                return_tuples.append((self.options[selected], selected))
-            return return_tuples
-        else:
-            return self.options[self.index], self.index
-
-    def get_title_lines(self, *, max_width: int = 80) -> List[str]:
+    def get_title_lines(self) -> List[str]:
         if self.title:
-            return textwrap.fill(self.title, max_width - 2, drop_whitespace=False).split("\n") + [""]
+            return [self.title, ""]
         return []
 
     def get_option_lines(self) -> List[str]:
+        self.term = cast(blessed.Terminal, self.term)
         lines: List[str] = []
         for index, option in enumerate(self.options):
             if index == self.index:
@@ -123,110 +178,212 @@ class Picker(Generic[OPTION_T]):
                 )
                 prefix = f"{prefix} {symbol}"
 
-            option_as_str = option.label if isinstance(option, Option) else option
+            option_as_str = (
+                f"{option.color}{option.label}{self.term.normal}"
+                if isinstance(option, Option)
+                else option
+            )
             lines.append(f"{prefix} {option_as_str}")
 
         return lines
 
-    def get_lines(self, *, max_width: int = 80) -> Tuple[List[str], int]:
-        title_lines = self.get_title_lines(max_width=max_width)
+    def get_lines(self) -> Tuple[List[str], int]:
+        title_lines = self.get_title_lines()
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self, screen: "curses._CursesWindow") -> None:
-        """draw the curses ui on the screen, handle scroll if needed"""
-        if self.clear_screen:
-            screen.clear()
+    def get_selected(self) -> PICK_RETURN_T:
+        """Return the current selected option as a tuple: (option, index)
+        or as a list of tuples (in case multiselect==True)
+        """
+        if self.multiselect:
+            return (
+                [(self.options[idx], idx) for idx in self.selected_indexes]
+                if self.multiselect
+                else (self.options[self.index], self.index)
+            )
+        else:
+            return self.options[self.index], self.index
 
-        y, x = self.position  # start point
+    def start(self) -> PICK_RETURN_T:
+        self.term = cast(blessed.Terminal, self.term)
+        errmsg = ""
 
-        max_y, max_x = screen.getmaxyx()
-        max_rows = max_y - y  # the max rows we can draw
+        # Note: can't use parenthesis here bc that is >= 3.10
+        with (
+            self.term.hidden_cursor(),
+            self.term.fullscreen(),
+            self.term.cbreak(),
+            self.term.location(self.position.x, self.position.y),
+        ):
+            if self.clear_screen:
+                print(self.term.clear())
+            self._display_screen()
 
-        lines, current_line = self.get_lines(max_width=max_x)
-
-        # calculate how many lines we should scroll, relative to the top
-        scroll_top = 0
-        if current_line > max_rows:
-            scroll_top = current_line - max_rows
-
-        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
-
-        description_present = False
-        for option in self.options:
-            if isinstance(option, Option) and option.description is not None:
-                description_present = True
-                break
-
-        title_length = len(self.get_title_lines(max_width=max_x))
-
-        for i, line in enumerate(lines_to_draw):
-            if description_present and i > title_length:
-                screen.addnstr(y, x, line, max_x // 2 - 2)
-            else:
-                screen.addnstr(y, x, line, max_x - 2)
-            y += 1
-
-        option = self.options[self.index]
-        if isinstance(option, Option) and option.description is not None:
-            description_lines = textwrap.fill(option.description, max_x // 2 - 2).split('\n')
-
-            for i, line in enumerate(description_lines):
-                screen.addnstr(i + title_length, max_x // 2, line, max_x - 2)
-
-        screen.refresh()
-
-    def run_loop(
-        self, screen: "curses._CursesWindow", position: Position
-    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
-        while True:
-            self.draw(screen)
-            c = screen.getch()
-            if self.quit_keys is not None and c in self.quit_keys:
-                if self.multiselect:
-                    return []
-                else:
+            selection_inprogress = True
+            while selection_inprogress:
+                key = self.term.inkey()
+                key_code = ord(key) if not key.is_sequence else key.code
+                if key_code in self.quit_keys:
                     return None, -1
-            elif c in KEYS_UP:
-                self.move_up()
-            elif c in KEYS_DOWN:
-                self.move_down()
-            elif c in KEYS_ENTER:
-                if (
-                    self.multiselect
-                    and len(self.selected_indexes) < self.min_selection_count
+
+                if key_code in self.down_keys:
+                    self.move_down()
+                elif key_code in self.up_keys:
+                    self.move_up()
+                elif (
+                    key_code in self.select_keys
+                    and self.multiselect
+                    and len(self.idxes_in_scope) != 0
                 ):
-                    continue
-                return self.get_selected()
-            elif c in KEYS_SELECT and self.multiselect:
-                self.mark_index()
+                    self.mark_index()
+                elif key_code in self.enter_keys:
+                    if len(self.idxes_in_scope) == 0:
+                        # don't let the user enter when
+                        # filtered too constrictively
+                        continue
+                    elif (
+                        self.multiselect
+                        and len(self.selected_indexes) < self.min_selection_count
+                    ):
+                        errmsg = (
+                            f"{self.term.red}Must select at least {self.min_selection_count} "
+                            + f"entry(s)!{self.term.normal}"
+                        )
+                    else:
+                        return self.get_selected()
+                elif key.is_sequence and key.name == "KEY_BACKSPACE":
+                    self.filter = self.filter[:-1] if self.filter else ""
+                else:
+                    # Is not a special key, so add it to the current filter
+                    self.filter += key
 
-    def config_curses(self) -> None:
-        try:
-            # use the default colors of the terminal
-            curses.use_default_colors()
-            # hide the cursor
-            curses.curs_set(0)
-        except Exception:
-            # Curses failed to initialize color support, eg. when TERM=vt100
-            curses.initscr()
+                print(self.term.clear())
 
-    def _start(self, screen: "curses._CursesWindow"):
-        self.config_curses()
-        return self.run_loop(screen, self.position)
+                if errmsg:
+                    print(errmsg)
+                    errmsg = ""
 
-    def start(self):
-        if self.screen:
-            # Given an existing screen
-            # don't make any lasting changes
-            last_cur = curses.curs_set(0)
-            ret = self.run_loop(self.screen, self.position)
-            if last_cur:
-                curses.curs_set(last_cur)
-            return ret
-        return curses.wrapper(self._start)
+                if self.filter:
+                    print(
+                        f"Currently filtering by: {self.term.yellow}'{self.filter}...'{self.term.normal}"
+                    )
+
+                self._display_screen()
+
+        return self.get_selected()
+
+    def _display_screen(self) -> None:
+        self.term = cast(blessed.Terminal, self.term)
+        # options_with_idx is used instead of just self.options because
+        # we need to be able to keep track of the original item's index
+        # in the case that we're filtering
+        options_with_idx = [c for c in enumerate(self.options)]
+
+        if self.filter:
+            new: list[Tuple[int, OPTION_T]] = []
+            for choice in options_with_idx:
+                opt = choice[1]
+                if isinstance(opt, Option):
+                    if escape_ansi(opt.label).startswith(self.filter) and opt.enabled:
+                        new.append(choice)
+                else:
+                    if escape_ansi(opt).startswith(self.filter):
+                        new.append(choice)
+            options_with_idx = new
+
+        if not options_with_idx:
+            self.idxes_in_scope = []
+            print(
+                f"{self.term.red}No matching results, please press backspace to unfilter...{self.term.normal}"
+            )
+            return
+
+        # Chunk logic stuff is required to do scrolling when too many
+        # vertical items
+        chunked_choices: List[List[Tuple[int, OPTION_T]]] = []
+        current_chunk: List[Tuple[int, OPTION_T]] = []
+        so_far = 0
+        chunk_to_render = 0
+        page = 0
+        for idx, pairing in enumerate(options_with_idx):
+            if isinstance(pairing[1], Option):
+                linesize = len(pairing[1].label)
+            else:
+                linesize = len(pairing[1])
+
+            # height of title, plus two pagination lines, plus some extra room:
+            title_size = 0 if not self.title else len(self.title)
+            pad_height = ceil(title_size / self.term.width) + 2 + 10
+            lines_used = ceil((linesize + pad_height) / self.term.width)
+            so_far += lines_used
+            if so_far > (self.term.height - pad_height):
+                # need to roll over
+                chunked_choices.append(current_chunk)
+                current_chunk = [pairing]
+                so_far = lines_used
+                page += 1
+            else:
+                current_chunk.append(pairing)
+
+            if idx == len(options_with_idx) - 1:
+                # at the end, need to add what we've built then drop out
+                chunked_choices.append(current_chunk)
+
+            if self.index == pairing[0]:
+                chunk_to_render = page
+
+        # need to set this so that when we're doing a command thats not
+        # modifying the filter (i.e up/down) we need to be able to tell
+        # whether the cursor is in scope
+        self.idxes_in_scope = [pair[0] for chunk in chunked_choices for pair in chunk]
+
+        # can't do this bc the index's aren't guarunteed to be consecutive
+        # outside the first iteration:
+        #   chunk_to_render = self.index // chunk_by
+
+        if self.title:
+            print(self.title)
+
+        if chunk_to_render > 0:
+            print(
+                f"{self.pagination_color}  ( scroll up to reveal previous entries ){self.term.normal}"
+            )
+
+        for val in chunked_choices[chunk_to_render]:
+            unselectable = ""
+            val_label = str(val[1])
+            if isinstance(val[1], Option) and not val[1].enabled:
+                unselectable = self.disabled_color
+
+            is_selected = ""
+            if self.multiselect:
+                is_selected = (
+                    f"{SYMBOL_CIRCLE_EMPTY} "
+                    if val[0] not in self.selected_indexes
+                    else f"{SYMBOL_CIRCLE_FILLED} "
+                )
+            if unselectable:
+                # need to scrub all color
+                label = (
+                    unselectable
+                    + escape_ansi(is_selected + val_label)
+                    + self.term.normal
+                )
+            else:
+                label = f"{is_selected}{val_label}{self.term.normal}"
+
+            if val[0] == self.index:
+                print(f"{self.indicator} {label}")
+            else:
+                print(f"{' ' * (len(self.indicator) + 1)}{label}")
+
+        if chunk_to_render < len(chunked_choices) - 1:
+            print(
+                f"{self.pagination_color}  ( scroll down to reveal additional entries ){self.term.normal}"
+            )
 
 
 def pick(
@@ -236,21 +393,90 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    screen: Optional["curses._CursesWindow"] = None,
-    position: Position = Position(0, 0),
+    position: Position = Position(1, 0),
     clear_screen: bool = True,
-    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
-):
-    picker: Picker = Picker(
-        options,
-        title,
-        indicator,
-        default_index,
-        multiselect,
-        min_selection_count,
-        screen,
-        position,
-        clear_screen,
-        quit_keys,
+    up_keys: Optional[List[int]] = None,
+    down_keys: Optional[List[int]] = None,
+    select_keys: Optional[List[int]] = None,
+    enter_keys: Optional[List[int]] = None,
+    quit_keys: Optional[List[int]] = None,
+    disabled_color: str = blessed.Terminal().gray35,
+    pagination_color: str = "",
+) -> PICK_RETURN_T:
+    up_keys = UP_KEYS if up_keys is None else UP_KEYS + up_keys
+    down_keys = DOWN_KEYS if down_keys is None else DOWN_KEYS + down_keys
+    select_keys = SELECT_KEYS if select_keys is None else SELECT_KEYS + select_keys
+    enter_keys = ENTER_KEYS if enter_keys is None else ENTER_KEYS + enter_keys
+    quit_keys = QUIT_KEYS if quit_keys is None else QUIT_KEYS + quit_keys
+
+    return Picker(
+        options=options,
+        title=title,
+        indicator=indicator,
+        default_index=default_index,
+        multiselect=multiselect,
+        min_selection_count=min_selection_count,
+        selected_indexes=[],
+        index=0,
+        clear_screen=clear_screen,
+        position=position,
+        up_keys=up_keys,
+        down_keys=down_keys,
+        select_keys=select_keys,
+        enter_keys=enter_keys,
+        quit_keys=quit_keys,
+        term=blessed.Terminal(),
+        disabled_color=disabled_color,
+        pagination_color=pagination_color,
+    ).start()
+
+
+if __name__ == "__main__":
+    print(
+        "Picked: ",
+        pick(
+            [
+                Option(
+                    "Option 1",
+                    "option 1",
+                    "this is option 1 and is not selectable",
+                    enabled=False,
+                ),
+                "option 2",
+                "option 3",
+                Option(
+                    "Option 4",
+                    "option 4",
+                    "this is option 4 and selectable and green",
+                    enabled=True,
+                    color=blessed.Terminal().green,
+                ),
+                "option 5",
+                Option(
+                    "Option 6",
+                    "option 6",
+                    "this is option 6 and colored but unselectable",
+                    enabled=False,
+                    color=blessed.Terminal().pink,
+                ),
+                "option 5",
+            ],
+            "(Up/down/tab to move; space to select/de-select; Enter to continue)",
+            indicator="=>",
+            multiselect=True,
+            clear_screen=False,
+            min_selection_count=2,
+        ),
     )
-    return picker.start()
+    print()
+
+    print(
+        "Picked: ",
+        pick(
+            ["Choice1", "choice 2", "choice3"],
+            "(Up/down/tab to move; Enter to select)",
+            indicator="=>",
+            multiselect=False,
+            quit_keys=[ord("q")],
+        ),
+    )

@@ -1,8 +1,12 @@
 from pick import pick
+from typing import List
+from blessed.keyboard import get_curses_keycodes # type: ignore
 
-KEY_CTRL_C = 3
-KEY_ESCAPE = 27
-QUIT_KEYS = (KEY_CTRL_C, KEY_ESCAPE, ord("q"))
+keystrokes = get_curses_keycodes()
+
+# https://blessed.readthedocs.io/en/latest/keyboard.html
+# KEY_EXIT is the escape key
+QUIT_KEYS: List[int] = [ord("q"), keystrokes["KEY_EXIT"], keystrokes["KEY_F1"]]
 
 title = "Please choose your favorite programming language: "
 options = ["Java", "JavaScript", "Python", "PHP", "C++", "Erlang", "Haskell"]
