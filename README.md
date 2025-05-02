@@ -159,7 +159,7 @@ import pick
 # overwrite UP_KEYS, DOWN_KEYS, SELECT_KEYS, ENTER_KEYS, QUIT_KEYS
 pick.UP_KEYS = []
 
-# would result in "u" being the only way to move the cursor up
+# would result in "U" being the only way to move the cursor up
 pick(..., up_keys = [ord('U')], ...)
 ```
 
