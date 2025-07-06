@@ -103,9 +103,14 @@ class Picker(Generic[OPTION_T]):
             return self.options[self.index], self.index
 
     def get_title_lines(self, *, max_width: int = 80) -> List[str]:
-        if self.title:
-            return textwrap.fill(self.title, max_width - 2, drop_whitespace=False).split("\n") + [""]
-        return []
+        if not self.title:
+            return []
+
+        if "\n" in self.title:
+            lines = self.title.split("\n")
+        else:
+            lines = textwrap.fill(self.title, max_width - 2, drop_whitespace=False).split("\n")
+        return lines + [""]
 
     def get_option_lines(self) -> List[str]:
         lines: List[str] = []
