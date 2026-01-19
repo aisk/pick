@@ -1,8 +1,31 @@
-import curses
+import os
+import sys
 import textwrap
 from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
+
+# Handle curses import for different environments
+if sys.platform == "win32":
+    # Check if we're in an MSYS2 environment
+    if "MSYSTEM" in os.environ:
+        # MSYS2 has built-in curses support
+        import curses
+    else:
+        # Native Windows requires windows-curses
+        try:
+            import curses
+        except ImportError:
+            try:
+                import windows_curses as curses
+            except ImportError:
+                raise ImportError(
+                    "On native Windows, the 'windows-curses' package is required. "
+                    "Please install it using: pip install windows-curses"
+                )
+else:
+    # Non-Windows systems have built-in curses
+    import curses
 
 __all__ = ["Picker", "pick", "Option"]
 
