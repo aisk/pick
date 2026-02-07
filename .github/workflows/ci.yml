@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           poetry env use ${{ matrix.python-version }}
-          poetry install
+          poetry install --with dev
       - name: Static type checking
         run: poetry run mypy .
         if: runner.os != 'Windows'
