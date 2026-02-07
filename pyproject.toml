@@ -13,9 +13,9 @@ homepage = "https://github.com/aisk/pick"
 keywords = ["terminal", "gui"]
 requires-python = ">=3.8"
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-windows-curses = {version = "^2.2.0", platform = "win32"}
+dependencies = [
+    "windows-curses>=2.2.0; platform_system=='Windows'",
+]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
