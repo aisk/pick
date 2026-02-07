@@ -1,23 +1,29 @@
-[tool.poetry]
+[project]
 name = "pick"
 version = "2.5.0"
 description = "Pick an option in the terminal with a simple GUI"
-authors = ["wong2 <wonderfuly@gmail.com>", "AN Long <aisk1988@gmail.com>"]
-license = "MIT"
+authors = [
+    {name = "wong2", email = "wonderfuly@gmail.com"},
+    {name = "AN Long", email = "aisk1988@gmail.com"}
+]
+license = {text = "MIT"}
 readme = "README.md"
 repository = "https://github.com/aisk/pick"
 homepage = "https://github.com/aisk/pick"
 keywords = ["terminal", "gui"]
+requires-python = ">=3.8"
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-windows-curses = {version = "^2.2.0", platform = "win32"}
+dependencies = [
+    "windows-curses>=2.2.0; platform_system=='Windows'",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^8.3.5"
-mypy = "^1.4"
-pre-commit = "^3.5.0"
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.5",
+    "mypy>=1.4",
+    "pre-commit>=3.5.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
