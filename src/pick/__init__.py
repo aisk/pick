@@ -4,7 +4,21 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
-__all__ = ["Picker", "pick", "Option"]
+from .backend import Backend
+from .blessed_backend import BlessedBackend
+from .curses_backend import CursesBackend
+
+__all__ = [
+    "Picker",
+    "pick",
+    "Option",
+    "Position",
+    "Backend",
+    "CursesBackend",
+    "BlessedBackend",
+    "SYMBOL_CIRCLE_FILLED",
+    "SYMBOL_CIRCLE_EMPTY",
+]
 
 
 @dataclass
@@ -28,6 +42,7 @@ PICK_RETURN_T = Tuple[OPTION_T, int]
 
 Position = namedtuple('Position', ['y', 'x'])
 
+
 @dataclass
 class Picker(Generic[OPTION_T]):
     options: Sequence[OPTION_T]
@@ -42,6 +57,7 @@ class Picker(Generic[OPTION_T]):
     position: Position = Position(0, 0)
     clear_screen: bool = True
     quit_keys: Optional[Union[Container[int], Iterable[int]]] = None
+    backend: Union[str, Backend] = "curses"
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -140,8 +156,8 @@ class Picker(Generic[OPTION_T]):
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def draw(self, screen: "curses._CursesWindow") -> None:
-        """draw the curses ui on the screen, handle scroll if needed"""
+    def draw(self, screen: Backend) -> None:
+        """draw the UI on the screen, handle scroll if needed"""
         if self.clear_screen:
             screen.clear()
 
@@ -184,7 +200,7 @@ class Picker(Generic[OPTION_T]):
         screen.refresh()
 
     def run_loop(
-        self, screen: "curses._CursesWindow", position: Position
+        self, screen: Backend, position: Position
     ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         while True:
             self.draw(screen)
@@ -208,6 +224,18 @@ class Picker(Generic[OPTION_T]):
             elif c in KEYS_SELECT and self.multiselect:
                 self.mark_index()
 
+    def _resolve_backend(self) -> Backend:
+        if isinstance(self.backend, Backend):
+            return self.backend
+        if self.backend == "curses":
+            return CursesBackend(screen=self.screen)
+        if self.backend == "blessed":
+            return BlessedBackend()
+        raise ValueError(
+            f"Unknown backend: {self.backend!r}. "
+            "Use 'curses', 'blessed', or a Backend instance."
+        )
+
     def config_curses(self) -> None:
         try:
             # use the default colors of the terminal
@@ -220,18 +248,31 @@ class Picker(Generic[OPTION_T]):
 
     def _start(self, screen: "curses._CursesWindow"):
         self.config_curses()
-        return self.run_loop(screen, self.position)
+        return self.run_loop(CursesBackend(screen=screen), self.position)
 
     def start(self):
-        if self.screen:
-            # Given an existing screen
-            # don't make any lasting changes
+        backend = self._resolve_backend()
+        if isinstance(backend, CursesBackend) and backend._screen is not None:
+            # Embedded in an existing curses application (backward-compatible)
             last_cur = curses.curs_set(0)
-            ret = self.run_loop(self.screen, self.position)
+            ret = self.run_loop(backend, self.position)
             if last_cur:
                 curses.curs_set(last_cur)
             return ret
-        return curses.wrapper(self._start)
+        elif isinstance(backend, CursesBackend):
+            # Standalone curses mode
+            def _curses_main(screen: "curses._CursesWindow"):
+                backend._screen = screen
+                backend.setup()
+                return self.run_loop(backend, self.position)
+            return curses.wrapper(_curses_main)
+        else:
+            # Other backends (e.g. blessed)
+            backend.setup()
+            try:
+                return self.run_loop(backend, self.position)
+            finally:
+                backend.teardown()
 
 
 def pick(
@@ -245,6 +286,7 @@ def pick(
     position: Position = Position(0, 0),
     clear_screen: bool = True,
     quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
+    backend: Union[str, Backend] = "curses",
 ):
     picker: Picker = Picker(
         options,
@@ -257,5 +299,6 @@ def pick(
         position,
         clear_screen,
         quit_keys,
+        backend,
     )
     return picker.start()

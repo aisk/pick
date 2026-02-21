@@ -1,3 +1,5 @@
+import os
+
 from pick import pick, Option
 
 
@@ -8,5 +10,6 @@ options = [
     Option("Option 3", description="This option is disabled!", enabled=False),
     Option("Option 4", description="Moving up and down, skips over the disabled options.")
 ]
-option, index = pick(options, title, indicator="=>")
+option, index = pick(options, title, indicator="=>",
+                     backend=os.environ.get("PICK_BACKEND", "curses"))
 print(f"You chose {option} at index {index}")
