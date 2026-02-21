@@ -17,6 +17,9 @@ dependencies = [
     "windows-curses>=2.2.0; platform_system=='Windows'",
 ]
 
+[project.optional-dependencies]
+blessed = ["blessed>=1.17.0"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",

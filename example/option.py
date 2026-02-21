@@ -1,3 +1,5 @@
+import os
+
 from pick import pick, Option
 
 title = "Please choose your favorite programming language: "
@@ -7,5 +9,6 @@ options = [
     Option("JavaScript", ".js"),
     Option("C++")
 ]
-option, index = pick(options, title, indicator="=>")
+option, index = pick(options, title, indicator="=>",
+                     backend=os.environ.get("PICK_BACKEND", "curses"))
 print(f"You chose {option} at index {index}")

@@ -3,10 +3,10 @@
 [![image](https://github.com/aisk/pick/actions/workflows/ci.yml/badge.svg)](https://github.com/aisk/pick/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/pick.svg)](https://pypi.python.org/pypi/pick)
 [![PyPI](https://img.shields.io/pypi/dm/pick)](https://pypi.python.org/pypi/pick)
-[![Python 3.8 - 3.13 support](https://img.shields.io/badge/Python-3.8_--_3.13-blue?logo=python&logoColor=ffd43b&labelColor=306998&color=ffe873)](https://docs.python.org/3/)
+[![Python 3.8 - 3.14 support](https://img.shields.io/badge/Python-3.8_--_3.14-blue?logo=python&logoColor=ffd43b&labelColor=306998&color=ffe873)](https://docs.python.org/3/)
 
-**pick** is a small python library to help you create curses based
-interactive selection list in the terminal.
+**pick** is a small python library to help you create interactive
+selection list in the terminal.
 
 |         Basic          |         Multiselect          |
 | :--------------------: | :--------------------------: |
@@ -61,6 +61,8 @@ interactive selection list in the terminal.
 - `position`: (optional), if you are using `pick` within an existing curses application use this to set the first position to write to. e.g., `position=pick.Position(y=1, x=1)`
 - `quit_keys`: (optional), if you want to quit early, you can pass a key codes.
   If the corresponding key are pressed, it will quit the menu.
+- `backend`: (optional), the rendering backend to use. Accepts `"curses"` (default),
+  `"blessed"` (requires `pip install pick[blessed]`), or a custom `Backend` instance.
 
 ## Community Projects
 
