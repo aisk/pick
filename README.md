@@ -16,6 +16,15 @@ selection list in the terminal.
 
     $ pip install pick
 
+### Optional: `blessed` backend
+
+`pick` uses the `curses` backend by default. If you prefer using
+[`blessed`](https://github.com/jquast/blessed), install the optional extra:
+
+    $ pip install "pick[blessed]"
+
+Then pass `backend="blessed"` to `pick(...)`.
+
 ## Usage
 
 **pick** comes with a simple api:
