@@ -53,7 +53,7 @@ class Picker(Generic[OPTION_T]):
     min_selection_count: int = 0
     selected_indexes: List[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
-    screen: Optional["curses._CursesWindow"] = None
+    screen: Optional[curses.window] = None
     position: Position = Position(0, 0)
     clear_screen: bool = True
     quit_keys: Optional[Union[Container[int], Iterable[int]]] = None
@@ -246,7 +246,7 @@ class Picker(Generic[OPTION_T]):
             # Curses failed to initialize color support, eg. when TERM=vt100
             curses.initscr()
 
-    def _start(self, screen: "curses._CursesWindow"):
+    def _start(self, screen: curses.window):
         self.config_curses()
         return self.run_loop(CursesBackend(screen=screen), self.position)
 
@@ -261,7 +261,7 @@ class Picker(Generic[OPTION_T]):
             return ret
         elif isinstance(backend, CursesBackend):
             # Standalone curses mode
-            def _curses_main(screen: "curses._CursesWindow"):
+            def _curses_main(screen: curses.window):
                 backend._screen = screen
                 backend.setup()
                 return self.run_loop(backend, self.position)
@@ -282,7 +282,7 @@ def pick(
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    screen: Optional["curses._CursesWindow"] = None,
+    screen: Optional[curses.window] = None,
     position: Position = Position(0, 0),
     clear_screen: bool = True,
     quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
