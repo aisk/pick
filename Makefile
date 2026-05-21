@@ -1,12 +1,12 @@
 .PHONY=publish
 publish:
-	poetry build
-	poetry publish
+	uv build
+	uv publish
 
 .PHONY=test
 test:
-	poetry run mypy .
-	poetry run pytest
+	uv run mypy .
+	uv run pytest
 
 .PHONY=clean
 clean:
