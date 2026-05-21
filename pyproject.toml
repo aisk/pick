@@ -8,8 +8,6 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-repository = "https://github.com/aisk/pick"
-homepage = "https://github.com/aisk/pick"
 keywords = ["terminal", "gui"]
 requires-python = ">=3.8"
 
@@ -20,6 +18,10 @@ dependencies = [
 [project.optional-dependencies]
 blessed = ["blessed>=1.17.0"]
 
+[project.urls]
+Homepage = "https://github.com/aisk/pick"
+Repository = "https://github.com/aisk/pick"
+
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
@@ -28,5 +30,5 @@ dev = [
 ]
 
 [build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.11.11,<0.12"]
+build-backend = "uv_build"

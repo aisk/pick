@@ -11,18 +11,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install poetry
-        run: pipx install poetry
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
       - name: Install dependencies
-        run: |
-          poetry env use ${{ matrix.python-version }}
-          poetry install --with dev
+        run: uv sync --locked --dev
       - name: Static type checking
-        run: poetry run mypy .
+        run: uv run mypy .
         if: runner.os != 'Windows'
       - name: Run test
-        run: poetry run pytest
+        run: uv run pytest
