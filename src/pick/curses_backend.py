@@ -7,7 +7,7 @@ from .backend import Backend
 class CursesBackend(Backend):
     """Backend that uses the curses standard library."""
 
-    def __init__(self, screen: Optional["curses._CursesWindow"] = None) -> None:
+    def __init__(self, screen: Optional[curses.window] = None) -> None:
         self._screen = screen
 
     def setup(self) -> None:
