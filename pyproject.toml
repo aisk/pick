@@ -6,7 +6,7 @@ authors = [
     {name = "wong2", email = "wonderfuly@gmail.com"},
     {name = "AN Long", email = "aisk1988@gmail.com"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 keywords = ["terminal", "gui"]
 requires-python = ">=3.8"
