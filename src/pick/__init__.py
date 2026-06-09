@@ -4,6 +4,8 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
+import cadule
+
 from .backend import Backend
 from .blessed_backend import BlessedBackend
 from .curses_backend import CursesBackend
@@ -16,6 +18,7 @@ __all__ = [
     "Backend",
     "CursesBackend",
     "BlessedBackend",
+    "__call__",
     "SYMBOL_CIRCLE_FILLED",
     "SYMBOL_CIRCLE_EMPTY",
 ]
@@ -302,3 +305,32 @@ def pick(
         backend,
     )
     return picker.start()
+
+
+@cadule
+def __call__(
+    options: Sequence[OPTION_T],
+    title: Optional[str] = None,
+    indicator: str = "*",
+    default_index: int = 0,
+    multiselect: bool = False,
+    min_selection_count: int = 0,
+    screen: Optional[curses.window] = None,
+    position: Position = Position(0, 0),
+    clear_screen: bool = True,
+    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
+    backend: Union[str, Backend] = "curses",
+):
+    return pick(
+        options,
+        title,
+        indicator,
+        default_index,
+        multiselect,
+        min_selection_count,
+        screen,
+        position,
+        clear_screen,
+        quit_keys,
+        backend,
+    )

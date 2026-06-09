@@ -31,6 +31,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cadule"
+version = "0.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/42/b1/d09010dcce164eeda7ceec92d3cca739ee30c0b1d6203b9589819b57a8c5/cadule-0.0.1.tar.gz", hash = "sha256:95aa7c467c67c19c392d091f0567a5a2d883cf35b69c64abfb668f4f77867b5e", size = 2745, upload-time = "2025-12-08T14:07:32.666Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/3d/e219e5fa6792de1aaf3826398014365ea880a4e17c0bfbb797e4d2ea24ab/cadule-0.0.1-py3-none-any.whl", hash = "sha256:265ff4b32db09adced2b0111fd6e283a14f24340e0a9235c74c4b3f944f33916", size = 2983, upload-time = "2025-12-08T14:07:31.267Z" },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -447,6 +456,7 @@ name = "pick"
 version = "2.6.0"
 source = { editable = "." }
 dependencies = [
+    { name = "cadule" },
     { name = "windows-curses", marker = "sys_platform == 'win32'" },
 ]
 
@@ -470,6 +480,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "blessed", marker = "extra == 'blessed'", specifier = ">=1.17.0" },
+    { name = "cadule", specifier = ">=0.0.1,<1.0.0" },
     { name = "windows-curses", marker = "sys_platform == 'win32'", specifier = ">=2.2.0" },
 ]
 provides-extras = ["blessed"]

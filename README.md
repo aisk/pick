@@ -29,7 +29,8 @@ Then pass `backend="blessed"` to `pick(...)`.
 
 **pick** comes with a simple api:
 
-    >>> from pick import pick
+    >>> import pick
+    >>> # You can also use `from pick import pick` if you do not want to use cadule's magic: https://github.com/aisk/cadule
 
     >>> title = 'Please choose your favorite programming language: '
     >>> options = ['Java', 'JavaScript', 'Python', 'PHP', 'C++', 'Erlang', 'Haskell']

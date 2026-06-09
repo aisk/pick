@@ -12,6 +12,7 @@ keywords = ["terminal", "gui"]
 requires-python = ">=3.8"
 
 dependencies = [
+    "cadule>=0.0.1,<1.0.0",
     "windows-curses>=2.2.0; platform_system=='Windows'",
 ]
 
