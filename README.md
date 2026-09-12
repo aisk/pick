@@ -76,4 +76,4 @@ Then pass `backend="blessed"` to `pick(...)`.
 
 ## Community Projects
 
-[pickpack](https://github.com/anafvana/pickpack): A fork of `pick` to select tree data.
+[pickpack](https://github.com/gc-av/pickpack): A fork of `pick` to select tree data.
