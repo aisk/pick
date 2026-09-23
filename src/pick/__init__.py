@@ -66,8 +66,11 @@ class Picker(Generic[OPTION_T]):
         if len(self.options) == 0:
             raise ValueError("options should not be an empty list")
 
-        if self.default_index >= len(self.options):
-            raise ValueError("default_index should be less than the length of options")
+        if self.default_index < -len(self.options) or self.default_index >= len(self.options):
+            raise ValueError("default_index is out of range of options")
+
+        if self.default_index < 0:
+            self.default_index += len(self.options)
 
         if self.multiselect and self.min_selection_count > len(self.options):
             raise ValueError(
