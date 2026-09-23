@@ -85,3 +85,13 @@ def test_mark_index_disabled_option():
     picker.index = 1  # Point directly to disabled option2
     picker.mark_index()
     assert picker.get_selected() == []  # Disabled option should NOT be marked
+
+
+def test_select_all_and_deselect_all():
+    options = [Option("option1"), Option("option2", enabled=False), Option("option3")]
+    picker = Picker(options, multiselect=True)
+    picker.select_all()
+    # Should only select option1 (0) and option3 (2), ignoring disabled option2 (1)
+    assert picker.get_selected() == [(Option("option1"), 0), (Option("option3"), 2)]
+    picker.deselect_all()
+    assert picker.get_selected() == []

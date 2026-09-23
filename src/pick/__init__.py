@@ -36,6 +36,8 @@ KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
 KEYS_UP = (curses.KEY_UP, ord("k"))
 KEYS_DOWN = (curses.KEY_DOWN, ord("j"))
 KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
+KEYS_SELECT_ALL = (ord("a"),)
+KEYS_DESELECT_ALL = (ord("d"),)
 
 SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
@@ -111,6 +113,21 @@ class Picker(Generic[OPTION_T]):
                 self.selected_indexes.remove(self.index)
             else:
                 self.selected_indexes.append(self.index)
+
+    def select_all(self) -> None:
+        """Select all enabled options in multiselect mode."""
+        if not self.multiselect:
+            return
+        self.selected_indexes = [
+            i for i, option in enumerate(self.options)
+            if not isinstance(option, Option) or option.enabled
+        ]
+
+    def deselect_all(self) -> None:
+        """Deselect all options in multiselect mode."""
+        if not self.multiselect:
+            return
+        self.selected_indexes.clear()
 
     def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
         """return the current selected option as a tuple: (option, index)
@@ -229,6 +246,10 @@ class Picker(Generic[OPTION_T]):
                 return self.get_selected()
             elif c in KEYS_SELECT and self.multiselect:
                 self.mark_index()
+            elif c in KEYS_SELECT_ALL and self.multiselect:
+                self.select_all()
+            elif c in KEYS_DESELECT_ALL and self.multiselect:
+                self.deselect_all()
 
     def _resolve_backend(self) -> Backend:
         if isinstance(self.backend, Backend):
