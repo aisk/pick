@@ -1,3 +1,5 @@
+import pytest
+
 from pick import Picker, Option
 
 
@@ -17,6 +19,12 @@ def test_default_index():
     options = ["option1", "option2", "option3"]
     picker = Picker(options, title, default_index=1)
     assert picker.get_selected() == ("option2", 1)
+
+
+def test_negative_default_index_raises():
+    options = ["option1", "option2", "option3"]
+    with pytest.raises(ValueError, match="default_index"):
+        Picker(options, default_index=-1)
 
 
 def test_get_lines():
