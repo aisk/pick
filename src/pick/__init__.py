@@ -210,7 +210,7 @@ class Picker(Generic[OPTION_T]):
         title_length = len(self.get_title_lines(max_width=max_x))
 
         for i, line in enumerate(lines_to_draw):
-            if description_present and i > title_length:
+            if description_present and i >= title_length:
                 screen.addnstr(y, x, line, max_x // 2 - 2)
             else:
                 screen.addnstr(y, x, line, max_x - 2)
