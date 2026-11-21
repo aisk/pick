@@ -1,8 +1,9 @@
 import curses
 import textwrap
 from collections import namedtuple
+from collections.abc import Container, Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Container, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 import cadule
 
@@ -28,7 +29,7 @@ __all__ = [
 class Option:
     label: str
     value: Any = None
-    description: Optional[str] = None
+    description: str | None = None
     enabled: bool = True
 
 
@@ -43,7 +44,7 @@ SYMBOL_CIRCLE_FILLED = "(x)"
 SYMBOL_CIRCLE_EMPTY = "( )"
 
 OPTION_T = TypeVar("OPTION_T", str, Option)
-PICK_RETURN_T = Tuple[OPTION_T, int]
+PICK_RETURN_T = tuple[OPTION_T, int]
 
 Position = namedtuple('Position', ['y', 'x'])
 
@@ -51,18 +52,18 @@ Position = namedtuple('Position', ['y', 'x'])
 @dataclass
 class Picker(Generic[OPTION_T]):
     options: Sequence[OPTION_T]
-    title: Optional[str] = None
+    title: str | None = None
     indicator: str = "*"
     default_index: int = 0
     multiselect: bool = False
     min_selection_count: int = 0
-    selected_indexes: List[int] = field(init=False, default_factory=list)
+    selected_indexes: list[int] = field(init=False, default_factory=list)
     index: int = field(init=False, default=0)
-    screen: Optional[curses.window] = None
+    screen: curses.window | None = None
     position: Position = Position(0, 0)
     clear_screen: bool = True
-    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None
-    backend: Union[str, Backend] = "curses"
+    quit_keys: Container[int] | Iterable[int] | None = None
+    backend: str | Backend = "curses"
 
     def __post_init__(self) -> None:
         if len(self.options) == 0:
@@ -132,7 +133,7 @@ class Picker(Generic[OPTION_T]):
             return
         self.selected_indexes.clear()
 
-    def get_selected(self) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
+    def get_selected(self) -> list[PICK_RETURN_T] | PICK_RETURN_T:
         """return the current selected option as a tuple: (option, index)
         or as a list of tuples (in case multiselect==True)
         """
@@ -144,7 +145,7 @@ class Picker(Generic[OPTION_T]):
         else:
             return self.options[self.index], self.index
 
-    def get_title_lines(self, *, max_width: int = 80) -> List[str]:
+    def get_title_lines(self, *, max_width: int = 80) -> list[str]:
         if not self.title:
             return []
 
@@ -154,8 +155,8 @@ class Picker(Generic[OPTION_T]):
             lines = textwrap.fill(self.title, max_width - 2, drop_whitespace=False).split("\n")
         return lines + [""]
 
-    def get_option_lines(self) -> List[str]:
-        lines: List[str] = []
+    def get_option_lines(self) -> list[str]:
+        lines: list[str] = []
         for index, option in enumerate(self.options):
             if index == self.index:
                 prefix = self.indicator
@@ -175,7 +176,7 @@ class Picker(Generic[OPTION_T]):
 
         return lines
 
-    def get_lines(self, *, max_width: int = 80) -> Tuple[List[str], int]:
+    def get_lines(self, *, max_width: int = 80) -> tuple[list[str], int]:
         title_lines = self.get_title_lines(max_width=max_width)
         option_lines = self.get_option_lines()
         lines = title_lines + option_lines
@@ -227,7 +228,7 @@ class Picker(Generic[OPTION_T]):
 
     def run_loop(
         self, screen: Backend, position: Position
-    ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
+    ) -> list[PICK_RETURN_T] | PICK_RETURN_T:
         while True:
             self.draw(screen)
             c = screen.getch()
@@ -307,16 +308,16 @@ class Picker(Generic[OPTION_T]):
 
 def pick(
     options: Sequence[OPTION_T],
-    title: Optional[str] = None,
+    title: str | None = None,
     indicator: str = "*",
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    screen: Optional[curses.window] = None,
+    screen: curses.window | None = None,
     position: Position = Position(0, 0),
     clear_screen: bool = True,
-    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
-    backend: Union[str, Backend] = "curses",
+    quit_keys: Container[int] | Iterable[int] | None = None,
+    backend: str | Backend = "curses",
 ):
     picker: Picker = Picker(
         options,
@@ -337,16 +338,16 @@ def pick(
 @cadule
 def __call__(
     options: Sequence[OPTION_T],
-    title: Optional[str] = None,
+    title: str | None = None,
     indicator: str = "*",
     default_index: int = 0,
     multiselect: bool = False,
     min_selection_count: int = 0,
-    screen: Optional[curses.window] = None,
+    screen: curses.window | None = None,
     position: Position = Position(0, 0),
     clear_screen: bool = True,
-    quit_keys: Optional[Union[Container[int], Iterable[int]]] = None,
-    backend: Union[str, Backend] = "curses",
+    quit_keys: Container[int] | Iterable[int] | None = None,
+    backend: str | Backend = "curses",
 ):
     return pick(
         options,

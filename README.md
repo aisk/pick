@@ -3,7 +3,7 @@
 [![image](https://github.com/aisk/pick/actions/workflows/ci.yml/badge.svg)](https://github.com/aisk/pick/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/pick.svg)](https://pypi.python.org/pypi/pick)
 [![PyPI](https://img.shields.io/pypi/dm/pick)](https://pypi.python.org/pypi/pick)
-[![Python 3.8 - 3.14 support](https://img.shields.io/badge/Python-3.8_--_3.14-blue?logo=python&logoColor=ffd43b&labelColor=306998&color=ffe873)](https://docs.python.org/3/)
+[![Python 3.10 - 3.14 support](https://img.shields.io/badge/Python-3.10_--_3.14-blue?logo=python&logoColor=ffd43b&labelColor=306998&color=ffe873)](https://docs.python.org/3/)
 
 **pick** is a small python library to help you create interactive
 selection list in the terminal.
