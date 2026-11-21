@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pytest
 
 from pick import Backend, Option, Picker
@@ -131,7 +129,7 @@ class FakeScreen(Backend):
     def clear(self) -> None:
         self.grid = [[" "] * self.width for _ in range(self.height)]
 
-    def getmaxyx(self) -> Tuple[int, int]:
+    def getmaxyx(self) -> tuple[int, int]:
         return self.height, self.width
 
     def addnstr(self, y: int, x: int, s: str, n: int) -> None:

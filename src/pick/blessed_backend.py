@@ -1,6 +1,5 @@
 import contextlib
 import curses
-from typing import Optional, Tuple
 
 from .backend import Backend
 
@@ -17,7 +16,7 @@ class BlessedBackend(Backend):
                 "Install with: pip install pick[blessed]"
             )
         self._term = blessed.Terminal()
-        self._ctx: Optional[contextlib.ExitStack] = None
+        self._ctx: contextlib.ExitStack | None = None
 
     def setup(self) -> None:
         self._ctx = contextlib.ExitStack()
@@ -33,7 +32,7 @@ class BlessedBackend(Backend):
     def clear(self) -> None:
         print(self._term.home + self._term.clear, end='', flush=True)
 
-    def getmaxyx(self) -> Tuple[int, int]:
+    def getmaxyx(self) -> tuple[int, int]:
         return (self._term.height, self._term.width)
 
     def addnstr(self, y: int, x: int, s: str, n: int) -> None:

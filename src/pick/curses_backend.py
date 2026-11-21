@@ -1,5 +1,4 @@
 import curses
-from typing import Optional, Tuple
 
 from .backend import Backend
 
@@ -7,7 +6,7 @@ from .backend import Backend
 class CursesBackend(Backend):
     """Backend that uses the curses standard library."""
 
-    def __init__(self, screen: Optional[curses.window] = None) -> None:
+    def __init__(self, screen: curses.window | None = None) -> None:
         self._screen = screen
 
     def setup(self) -> None:
@@ -24,7 +23,7 @@ class CursesBackend(Backend):
         assert self._screen is not None
         self._screen.clear()
 
-    def getmaxyx(self) -> Tuple[int, int]:
+    def getmaxyx(self) -> tuple[int, int]:
         assert self._screen is not None
         return self._screen.getmaxyx()
 

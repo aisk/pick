@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
 
 
 class Backend(ABC):
@@ -15,7 +14,7 @@ class Backend(ABC):
     def clear(self) -> None: ...
 
     @abstractmethod
-    def getmaxyx(self) -> Tuple[int, int]: ...
+    def getmaxyx(self) -> tuple[int, int]: ...
 
     @abstractmethod
     def addnstr(self, y: int, x: int, s: str, n: int) -> None: ...
