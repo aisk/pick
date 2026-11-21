@@ -211,7 +211,7 @@ class Picker(Generic[OPTION_T]):
         title_length = len(self.get_title_lines(max_width=max_x))
 
         for i, line in enumerate(lines_to_draw):
-            if description_present and i >= title_length:
+            if description_present and scroll_top + i >= title_length:
                 screen.addnstr(y, x, line, max_x // 2 - 2)
             else:
                 screen.addnstr(y, x, line, max_x - 2)
@@ -220,9 +220,10 @@ class Picker(Generic[OPTION_T]):
         option = self.options[self.index]
         if isinstance(option, Option) and option.description is not None:
             description_lines = textwrap.fill(option.description, max_x // 2 - 2).split('\n')
+            description_top = max(title_length - scroll_top, 0)
 
             for i, line in enumerate(description_lines):
-                screen.addnstr(i + title_length, max_x // 2, line, max_x - 2)
+                screen.addnstr(i + description_top, max_x // 2, line, max_x - 2)
 
         screen.refresh()
 
