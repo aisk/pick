@@ -157,3 +157,22 @@ def test_draw_truncates_first_option_when_description_present():
     # row 0: title, row 1: blank, row 2: first option + its description
     # option label is truncated to max_x // 2 - 2 = 28 chars, description starts at max_x // 2 = 30
     assert screen.row(2) == "* first option has a really ".ljust(30) + "short"
+
+
+def test_draw_description_when_scrolled():
+    options = [
+        Option(f"option {i:02d} with a long-ish label", description=f"description of {i:02d}")
+        for i in range(20)
+    ]
+    picker = Picker(options, title="title")
+    for _ in range(15):
+        picker.move_down()
+    screen = FakeScreen(height=10, width=60)
+    picker.draw(screen)
+    # options 06..15 are visible
+    rows = [screen.row(y) for y in range(10)]
+    for y, row in enumerate(rows):
+        assert row[:28].strip().endswith(f"option {y + 6:02d} with a long-ish")
+    assert rows[0][30:] == "description of 15"
+    for row in rows[1:]:
+        assert row[28:].strip() == ""
