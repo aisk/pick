@@ -1,6 +1,8 @@
+from typing import Tuple
+
 import pytest
 
-from pick import Option, Picker
+from pick import Backend, Option, Picker
 
 
 def test_move_up_down():
@@ -112,3 +114,48 @@ def test_select_all_and_deselect_all():
     assert picker.get_selected() == [(Option("option1"), 0), (Option("option3"), 2)]
     picker.deselect_all()
     assert picker.get_selected() == []
+
+
+class FakeScreen(Backend):
+    def __init__(self, height: int, width: int) -> None:
+        self.height = height
+        self.width = width
+        self.clear()
+
+    def setup(self) -> None:
+        pass
+
+    def teardown(self) -> None:
+        pass
+
+    def clear(self) -> None:
+        self.grid = [[" "] * self.width for _ in range(self.height)]
+
+    def getmaxyx(self) -> Tuple[int, int]:
+        return self.height, self.width
+
+    def addnstr(self, y: int, x: int, s: str, n: int) -> None:
+        for i, ch in enumerate(s[:n]):
+            self.grid[y][x + i] = ch
+
+    def getch(self) -> int:
+        return -1
+
+    def refresh(self) -> None:
+        pass
+
+    def row(self, y: int) -> str:
+        return "".join(self.grid[y]).rstrip()
+
+
+def test_draw_truncates_first_option_when_description_present():
+    options = [
+        Option("first option has a really really long label", description="short"),
+        Option("second", description="desc 2"),
+    ]
+    picker = Picker(options, title="title")
+    screen = FakeScreen(height=10, width=60)
+    picker.draw(screen)
+    # row 0: title, row 1: blank, row 2: first option + its description
+    # option label is truncated to max_x // 2 - 2 = 28 chars, description starts at max_x // 2 = 30
+    assert screen.row(2) == "* first option has a really ".ljust(30) + "short"
